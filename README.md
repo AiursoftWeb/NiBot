@@ -1,8 +1,8 @@
 # NiBot
 
-[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://gitlab.aiursoft.cn/anduin/Ni-Bot/-/blob/master/LICENSE)
-[![Pipeline stat](https://gitlab.aiursoft.cn/anduin/Ni-Bot/badges/master/pipeline.svg)](https://gitlab.aiursoft.cn/anduin/Ni-Bot/-/pipelines)
-[![Test Coverage](https://gitlab.aiursoft.cn/anduin/Ni-Bot/badges/master/coverage.svg)](https://gitlab.aiursoft.cn/anduin/Ni-Bot/-/pipelines)
+[![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://gitlab.aiursoft.cn/aiursoft/Ni-Bot/-/blob/master/LICENSE)
+[![Pipeline stat](https://gitlab.aiursoft.cn/aiursoft/Ni-Bot/badges/master/pipeline.svg)](https://gitlab.aiursoft.cn/aiursoft/Ni-Bot/-/pipelines)
+[![Test Coverage](https://gitlab.aiursoft.cn/aiursoft/Ni-Bot/badges/master/coverage.svg)](https://gitlab.aiursoft.cn/aiursoft/Ni-Bot/-/pipelines)
 [![NuGet version](https://img.shields.io/nuget/v/Aiursoft.NiBot.svg)](https://www.nuget.org/packages/Aiursoft.NiBot/)
 
 A small project helps me to parse and save my videos.
