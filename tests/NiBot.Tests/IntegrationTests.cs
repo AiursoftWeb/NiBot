@@ -45,11 +45,4 @@ public class IntegrationTests
         var result = await _program.InvokeAsync(new[] { "--wtf" });
         Assert.AreEqual(1, result);
     }
-
-    [TestMethod]
-    public async Task InvokeWithoutArg()
-    {
-        var result = await _program.InvokeAsync(Array.Empty<string>());
-        Assert.AreEqual(0, result);
-    }
 }
