@@ -32,7 +32,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\NiBot.Core\NiBot.Core.csproj" />
+	  <ProjectReference Include="..\NiBot.Calendar\NiBot.Calendar.csproj" />
 	</ItemGroup>
 
 

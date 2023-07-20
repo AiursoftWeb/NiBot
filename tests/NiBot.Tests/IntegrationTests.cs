@@ -1,6 +1,8 @@
 ﻿using System.CommandLine;
+using Aiursoft.CommandFramework.Extensions;
+using Aiursoft.NiBot.Calendar;
+using Aiursoft.NiBot.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Aiursoft.NiBot.Core.Framework;
 
 namespace NiBot.Tests;
 
@@ -11,9 +13,9 @@ public class IntegrationTests
 
     public IntegrationTests()
     {
-        this._program = new RootCommand("Test env.")
+        _program = new RootCommand("Test env.")
             .AddGlobalOptions()
-            .AddPlugins();
+            .AddPlugins(new CalendarPlugin());
     }
 
     [TestMethod]
@@ -29,6 +31,13 @@ public class IntegrationTests
         var result = await _program.InvokeAsync(new[] { "--version" });
         Assert.AreEqual(0, result);
     }
+    
+    [TestMethod]
+    public async Task InvokeCalendar()
+    {
+        var result = await _program.InvokeAsync(new[] { "calendar", "-v" });
+        Assert.AreEqual(0, result);
+    }
 
     [TestMethod]
     public async Task InvokeUnknown()
@@ -41,6 +50,6 @@ public class IntegrationTests
     public async Task InvokeWithoutArg()
     {
         var result = await _program.InvokeAsync(Array.Empty<string>());
-        Assert.AreEqual(1, result);
+        Assert.AreEqual(0, result);
     }
 }
