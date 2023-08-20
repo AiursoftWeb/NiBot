@@ -1,39 +1,33 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<!--Build and code-->
-		<OutputType>Exe</OutputType>
-		<Version>0.0.5</Version>
-		<TargetFramework>net6.0</TargetFramework>
-		<AssemblyName>NiBot</AssemblyName>
-		<RootNamespace>Aiursoft.NiBot</RootNamespace>
-		<!--Tool-->
-		<PackAsTool>true</PackAsTool>
-		<ToolCommandName>NiBot</ToolCommandName>
-		<!--Best practice-->
-		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
-		<SelfContained>false</SelfContained>
-		<PublishTrimmed>false</PublishTrimmed>
-		<PublishReadyToRun>false</PublishReadyToRun>
-		<PublishSingleFile>false</PublishSingleFile>
-		<!--Nuget-->
-		<Company>Aiursoft</Company>
-		<Product>NiBot</Product>
-		<Authors>anduin2017</Authors>
-		<Description>A cli tool project helps to re-encode and save all videos under a path.</Description>
-		<PackageTags>cli nuget dotnet ffmpeg</PackageTags>
-		<RepositoryType>git</RepositoryType>
-		<RepositoryUrl>https://gitlab.aiursoft.cn/Anduin/NiBot</RepositoryUrl>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<PackageId>Aiursoft.NiBot</PackageId>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<PackageProjectUrl>https://gitlab.aiursoft.cn/Anduin/NiBot</PackageProjectUrl>
-	</PropertyGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\NiBot.Calendar\NiBot.Calendar.csproj" />
-	</ItemGroup>
-
-
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <Version>0.0.5</Version>
+        <TargetFramework>net6.0</TargetFramework>
+        <AssemblyName>NiBot</AssemblyName>
+        <RootNamespace>Aiursoft.NiBot</RootNamespace>
+        <IsTestProject>false</IsTestProject>
+        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <IsPackable>true</IsPackable>
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>NiBot</ToolCommandName>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <SelfContained>false</SelfContained>
+        <PublishTrimmed>false</PublishTrimmed>
+        <PublishReadyToRun>false</PublishReadyToRun>
+        <PublishSingleFile>false</PublishSingleFile>
+        <Company>Aiursoft</Company>
+        <Product>NiBot</Product>
+        <Authors>anduin2017</Authors>
+        <Description>A cli tool project helps to re-encode and save all videos under a path.</Description>
+        <PackageId>NiBot</PackageId>
+        <PackageTags>cli nuget dotnet ffmpeg</PackageTags>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageProjectUrl>https://gitlab.aiursoft.cn/Anduin/NiBot</PackageProjectUrl>
+        <RepositoryType>git</RepositoryType>
+        <RepositoryUrl>https://gitlab.aiursoft.cn/Anduin/NiBot</RepositoryUrl>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\NiBot.Calendar\NiBot.Calendar.csproj" />
+    </ItemGroup>
 </Project>
