@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>Library</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net7.0</TargetFramework>
         <AssemblyName>NiBot.Calendar</AssemblyName>
         <RootNamespace>NiBot.Calendar</RootNamespace>
         <IsTestProject>false</IsTestProject>
