@@ -1,5 +1,6 @@
 ﻿using Aiursoft.CommandFramework;
 using Aiursoft.CommandFramework.Extensions;
+using Aiursoft.NiBot.Calendar;
 using Aiursoft.NiBot.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -18,7 +19,7 @@ public class IntegrationTests
                 command
                     .AddGlobalOptions()
                     .AddPlugins(
-                        // Your plugins
+                        new CalendarPlugin()
                     );
             });
     }
