@@ -1,6 +1,5 @@
-﻿using System.CommandLine;
+﻿using Aiursoft.CommandFramework;
 using Aiursoft.CommandFramework.Extensions;
-using Aiursoft.NiBot.Calendar;
 using Aiursoft.NiBot.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -9,40 +8,50 @@ namespace NiBot.Tests;
 [TestClass]
 public class IntegrationTests
 {
-    private readonly RootCommand _program;
+    private readonly AiursoftCommand _program;
 
     public IntegrationTests()
     {
-        _program = new RootCommand("Test env.")
-            .AddGlobalOptions()
-            .AddPlugins(new CalendarPlugin());
+        _program = new AiursoftCommand()
+            .Configure(command =>
+            {
+                command
+                    .AddGlobalOptions()
+                    .AddPlugins(
+                        // Your plugins
+                    );
+            });
     }
 
     [TestMethod]
     public async Task InvokeHelp()
     {
-        var result = await _program.InvokeAsync(new[] { "--help" });
-        Assert.AreEqual(0, result);
+        var result = await _program.TestRunAsync(new[] { "--help" });
+
+        Assert.AreEqual(0, result.ProgramReturn);
+        Assert.IsTrue(result.Output.Contains("Options:"));
+        Assert.IsTrue(string.IsNullOrWhiteSpace(result.Error));
     }
 
     [TestMethod]
     public async Task InvokeVersion()
     {
-        var result = await _program.InvokeAsync(new[] { "--version" });
-        Assert.AreEqual(0, result);
-    }
-    
-    [TestMethod]
-    public async Task InvokeCalendar()
-    {
-        var result = await _program.InvokeAsync(new[] { "calendar", "-v" });
-        Assert.AreEqual(0, result);
+        var result = await _program.TestRunAsync(new[] { "--version" });
+        Assert.AreEqual(0, result.ProgramReturn);
     }
 
     [TestMethod]
     public async Task InvokeUnknown()
     {
-        var result = await _program.InvokeAsync(new[] { "--wtf" });
-        Assert.AreEqual(1, result);
+        var result = await _program.TestRunAsync(new[] { "--wtf" });
+        Assert.AreEqual(1, result.ProgramReturn);
+    }
+
+    [TestMethod]
+    public async Task InvokeWithoutArg()
+    {
+        var result = await _program.TestRunAsync(Array.Empty<string>());
+        Assert.AreEqual(1, result.ProgramReturn);
     }
 }
+
