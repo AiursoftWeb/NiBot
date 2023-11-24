@@ -4,7 +4,7 @@
 [![Pipeline stat](https://gitlab.aiursoft.cn/aiursoft/Ni-Bot/badges/master/pipeline.svg)](https://gitlab.aiursoft.cn/aiursoft/Ni-Bot/-/pipelines)
 [![Test Coverage](https://gitlab.aiursoft.cn/aiursoft/Ni-Bot/badges/master/coverage.svg)](https://gitlab.aiursoft.cn/aiursoft/Ni-Bot/-/pipelines)
 [![NuGet version](https://img.shields.io/nuget/v/Aiursoft.NiBot.svg)](https://www.nuget.org/packages/Aiursoft.NiBot/)
-[![ManHours](https://manhours.aiursoft.cn/gitlab/gitlab.aiursoft.cn/aiursoft/ni-bot.svg)](https://gitlab.aiursoft.cn/aiursoft/ni-bot/-/commits/master?ref_type=heads)
+[![ManHours](https://manhours.aiursoft.cn/r/gitlab.aiursoft.cn/aiursoft/ni-bot.svg)](https://gitlab.aiursoft.cn/aiursoft/ni-bot/-/commits/master?ref_type=heads)
 
 A small project helps me to parse and save my videos.
 
