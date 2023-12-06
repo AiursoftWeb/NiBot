@@ -10,6 +10,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Aiursoft.CommandFramework" Version="7.0.16" />
+    <PackageReference Include="Aiursoft.CommandFramework" Version="7.0.17" />
   </ItemGroup>
 </Project>
