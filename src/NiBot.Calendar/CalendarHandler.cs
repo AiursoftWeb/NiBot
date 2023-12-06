@@ -1,4 +1,4 @@
-﻿using System.CommandLine;
+﻿using System.CommandLine.Invocation;
 using Aiursoft.CommandFramework.Framework;
 using Aiursoft.CommandFramework.Models;
 using Aiursoft.CommandFramework.Services;
@@ -7,19 +7,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Aiursoft.NiBot.Calendar;
 
-public class CalendarHandler : CommandHandler
+public class CalendarHandler : ExecutableCommandHandlerBuilder
 {
     public override string Name => "calendar";
 
     public override string Description => "Show calendar.";
 
-    public override void OnCommandBuilt(Command command)
+    protected override Task Execute(InvocationContext context)
     {
-        command.SetHandler(Execute, CommonOptionsProvider.VerboseOption);
-    }
-
-    private Task Execute(bool verbose)
-    {
+        var verbose = context.ParseResult.GetValueForOption(CommonOptionsProvider.VerboseOption);
         var services = ServiceBuilder
             .CreateCommandHostBuilder<Startup>(verbose)
             .Build()

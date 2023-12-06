@@ -1,13 +1,12 @@
 ﻿using Aiursoft.CommandFramework.Abstracts;
-using Aiursoft.CommandFramework.Framework;
 
 namespace Aiursoft.NiBot.Calendar;
 
 public class CalendarPlugin : IPlugin
 {
-    public CommandHandler[] Install()
+    public ICommandHandlerBuilder[] Install()
     {
-        return new CommandHandler[]
+        return new ICommandHandlerBuilder[]
         {
             new CalendarHandler(),
         };

@@ -3,7 +3,7 @@ using Aiursoft.CommandFramework.Extensions;
 using Aiursoft.NiBot.Calendar;
 using Aiursoft.NiBot.Core;
 
-return await new AiursoftCommand()
+return await new AiursoftCommandApp()
     .Configure(command =>
     {
         command

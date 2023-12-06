@@ -5,7 +5,7 @@ namespace Aiursoft.NiBot.Core;
 
 public static class OptionsProvider
 {
-    public static RootCommand AddGlobalOptions(this RootCommand command)
+    public static Command AddGlobalOptions(this Command command)
     {
         var options = new Option[]
         {
