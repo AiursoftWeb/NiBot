@@ -1,7 +1,6 @@
 ﻿using Aiursoft.CommandFramework;
-using Aiursoft.CommandFramework.Extensions;
+using Aiursoft.CommandFramework.Models;
 using Aiursoft.NiBot.Calendar;
-using Aiursoft.NiBot.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace NiBot.Tests;
@@ -9,20 +8,10 @@ namespace NiBot.Tests;
 [TestClass]
 public class IntegrationTests
 {
-    private readonly AiursoftCommandApp _program;
-
-    public IntegrationTests()
-    {
-        _program = new AiursoftCommandApp()
-            .Configure(command =>
-            {
-                command
-                    .AddGlobalOptions()
-                    .AddPlugins(
-                        new CalendarPlugin()
-                    );
-            });
-    }
+    private readonly NestedCommandApp _program = new NestedCommandApp()
+        .WithGlobalOptions(CommonOptionsProvider.DryRunOption)
+        .WithGlobalOptions(CommonOptionsProvider.VerboseOption)
+        .WithFeature(new CalendarHandler());
 
     [TestMethod]
     public async Task InvokeHelp()

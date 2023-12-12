@@ -1,15 +1,10 @@
 ﻿using Aiursoft.CommandFramework;
-using Aiursoft.CommandFramework.Extensions;
+using Aiursoft.CommandFramework.Models;
 using Aiursoft.NiBot.Calendar;
-using Aiursoft.NiBot.Core;
 
-return await new AiursoftCommandApp()
-    .Configure(command =>
-    {
-        command
-            .AddGlobalOptions()
-            .AddPlugins(
-                new CalendarPlugin()
-            );
-    })
+return await new NestedCommandApp()
+    .WithGlobalOptions(CommonOptionsProvider.DryRunOption)
+    .WithGlobalOptions(CommonOptionsProvider.VerboseOption)
+    .WithFeature(new CalendarHandler())
     .RunAsync(args);
+
