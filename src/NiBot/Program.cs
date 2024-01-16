@@ -1,6 +1,6 @@
 ﻿using Aiursoft.CommandFramework;
 using Aiursoft.CommandFramework.Models;
-using Aiursoft.NiBot.Calendar;
+using NiBot.Calendar;
 
 return await new NestedCommandApp()
     .WithGlobalOptions(CommonOptionsProvider.DryRunOption)
