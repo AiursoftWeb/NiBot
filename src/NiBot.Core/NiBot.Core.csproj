@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>NiBot.Core</AssemblyName>
     <RootNamespace>Aiursoft.NiBot.Core</RootNamespace>
     <IsTestProject>false</IsTestProject>
@@ -10,6 +10,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Aiursoft.CommandFramework" Version="7.0.25" />
+    <PackageReference Include="Aiursoft.CommandFramework" Version="8.0.1" />
   </ItemGroup>
 </Project>
