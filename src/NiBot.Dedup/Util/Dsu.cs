@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace NiBot.Dedup.Util;
+﻿namespace NiBot.Dedup.Util;
 
 public class Dsu
 {
