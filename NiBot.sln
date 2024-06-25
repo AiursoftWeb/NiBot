@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NiBot.Tests", "tests\NiBot.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiBot.Calendar", "src\NiBot.Calendar\NiBot.Calendar.csproj", "{0CB8CF7F-7A3F-41F7-8863-50562421B014}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NiBot.Dedup", "src\NiBot.Dedup\NiBot.Dedup.csproj", "{F4DCA6D7-0E4C-413F-846B-71A2899FFC52}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{0CB8CF7F-7A3F-41F7-8863-50562421B014}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0CB8CF7F-7A3F-41F7-8863-50562421B014}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0CB8CF7F-7A3F-41F7-8863-50562421B014}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4DCA6D7-0E4C-413F-846B-71A2899FFC52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4DCA6D7-0E4C-413F-846B-71A2899FFC52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4DCA6D7-0E4C-413F-846B-71A2899FFC52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4DCA6D7-0E4C-413F-846B-71A2899FFC52}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,6 +52,7 @@ Global
 		{8BB6EA69-6487-4709-B329-65B2F26DBDC2} = {C3378506-CFC5-4A6D-BF31-E34D2F49830A}
 		{C4E0DD67-7F60-4EFB-8684-47A0EF8BEE4A} = {00C03649-1C34-421C-8399-2F6323C41E39}
 		{0CB8CF7F-7A3F-41F7-8863-50562421B014} = {C3378506-CFC5-4A6D-BF31-E34D2F49830A}
+		{F4DCA6D7-0E4C-413F-846B-71A2899FFC52} = {C3378506-CFC5-4A6D-BF31-E34D2F49830A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BAA83CF2-A10A-43F1-B402-562B894ACF5D}

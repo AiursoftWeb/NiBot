@@ -31,5 +31,6 @@
   <ItemGroup>
     <ProjectReference Include="..\NiBot.Calendar\NiBot.Calendar.csproj" />
     <None Include="../../README.md" Pack="true" PackagePath="." />
+    <ProjectReference Include="..\NiBot.Dedup\NiBot.Dedup.csproj" />
   </ItemGroup>
 </Project>
