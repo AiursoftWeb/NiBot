@@ -52,9 +52,21 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                     }
                 }
             }
-
+            
             if (shouldTakeAction)
             {
+                // Respect the keep argument.
+                // var thePhotoShouldBeTakenAction = keep switch
+                // {
+                //     KeepPreference.Newest => duplicatePair.Left.CreationTime < duplicatePair.Right.CreationTime,
+                //     KeepPreference.Oldest => duplicatePair.Left.CreationTime > duplicatePair.Right.CreationTime,
+                //     KeepPreference.Smallest => duplicatePair.Left.Length > duplicatePair.Right.Length,
+                //     KeepPreference.Largest => duplicatePair.Left.Length < duplicatePair.Right.Length,
+                //     KeepPreference.HighestResolution => duplicatePair.Left.Width * duplicatePair.Left.Height < duplicatePair.Right.Width * duplicatePair.Right.Height,
+                //     KeepPreference.LowestResolution => duplicatePair.Left.Width * duplicatePair.Left.Height > duplicatePair.Right.Width * duplicatePair.Right.Height,
+                //     _ => throw new ArgumentOutOfRangeException()
+                // };
+                
                 switch (action)
                 {
                     case DuplicateAction.Nothing:
@@ -64,6 +76,13 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                         logger.LogInformation("Deleted {path}.", duplicatePair.Right.PhysicalPath);
                         break;
                     case DuplicateAction.MoveToTrash:
+                        var trashFolder = Path.Combine(path, ".trash");
+                        if (!Directory.Exists(trashFolder))
+                        {
+                            Directory.CreateDirectory(trashFolder);
+                        }
+                        var trashPath = Path.Combine(trashFolder, Path.GetFileName(duplicatePair.Right.PhysicalPath));
+                        File.Move(duplicatePair.Right.PhysicalPath, trashPath);
                         logger.LogInformation("Moved {path} to trash.", duplicatePair.Right.PhysicalPath);
                         break;
                 }
