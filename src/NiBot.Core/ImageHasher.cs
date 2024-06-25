@@ -15,12 +15,33 @@ public class ImageHasher(ILogger<DedupEngine> logger, CanonPool canonPool)
         {
             canonPool.RegisterNewTaskToPool(async () =>
             {
-                var mappedImage = await MappedImage.CreateAsync(image, hashAlgo);
-                mappedImages.Add(mappedImage);
+                try
+                {
+                    var mappedImage = await MappedImage.CreateAsync(image, hashAlgo);
+                    mappedImages.Add(mappedImage);
+                }
+                catch (Exception e)
+                {
+                    logger.LogError(e, "Failed to map image {image}.", image);
+                }
             });
         }
 
         await canonPool.RunAllTasksInPoolAsync(Environment.ProcessorCount);
         return mappedImages.ToArray();
+    }
+}
+
+public static class ArrayExtensions
+{
+    public static IEnumerable<(T left, T right)> YieldPairs<T>(this T[] array)
+    {
+        for (var i = 0; i < array.Length; i++)
+        {
+            for (var j = i + 1; j < array.Length; j++)
+            {
+                yield return (array[i], array[j]);
+            }
+        }
     }
 }
