@@ -19,6 +19,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
     /// <param name="interactive">A flag indicating whether to interactively prompt the user for actions on each duplicate set.</param>
     /// <param name="extensions">An array of file extensions to consider for deduplication. If specified, only files with these extensions will be considered.</param>
     /// <param name="verbose">A flag indicating whether to output verbose log messages.</param>
+    /// <param name="threads"></param>
     /// <remarks>
     /// The DedupAsync method removes duplicate files from the specified directory based on their content similarity.
     /// Files are considered duplicates if their content similarity percentage is above the specified similarity threshold.
@@ -27,15 +28,14 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
     /// <returns>
     /// A Task that represents the asynchronous deduplication operation. The Task completes when the deduplication is finished.
     /// </returns>
-    public async Task DedupAsync(
-        string path, 
-        int similarityBar, 
-        bool recursive, 
-        KeepPreference[] keepPreferences, 
-        DuplicateAction action, 
-        bool interactive, 
-        string[] extensions, 
-        bool verbose)
+    public async Task DedupAsync(string path,
+        int similarityBar,
+        bool recursive,
+        KeepPreference[] keepPreferences,
+        DuplicateAction action,
+        bool interactive,
+        string[] extensions,
+        bool verbose, int threads)
     {
         logger.LogTrace("Start de-duplicating images in {path}. Minimum similarity bar is {similarityBar}. Recursive: {recursive}. Keep: {keepPreferences}. Action: {action}. Interactive: {interactive}. Extensions: {extensions}.",
             path, similarityBar, recursive, keepPreferences, action, interactive, string.Join(", ", extensions));
@@ -47,7 +47,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
             .ToArray();
 
         logger.LogInformation("Found {Count} images in {path}. Calculating hashes...", images.Length, path);
-        var mappedImages = await imageHasher.MapImagesAsync(images, showProgress: !verbose);
+        var mappedImages = await imageHasher.MapImagesAsync(images, showProgress: !verbose, threads: threads);
 
         logger.LogInformation("Calculating duplicates...");
         var imageGroups = BuildImageGroups(mappedImages, similarityBar).ToArray();

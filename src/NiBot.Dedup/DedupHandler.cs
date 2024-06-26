@@ -38,18 +38,23 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
 
     private static readonly Option<DuplicateAction> ActionOption = new(
         ["--action", "-a"],
-        () => DuplicateAction.Nothing,
-        "Action to take when duplicates are found. Default is [Nothing]. Available options: Nothing, Delete, MoveToTrash, MoveAndCopyOriginalToTrash.");
+        () => DuplicateAction.MoveToTrash,
+        "Action to take when duplicates are found. Default is [MoveToTrash]. Available options: Nothing, Delete, MoveToTrash.");
     
-    private static readonly Option<bool> InteractiveOption = new(
-        ["--interactive", "-i"],
+    private static readonly Option<bool> YesOption = new(
+        ["--yes", "-y"],
         () => false,
-        "Interactive mode. Ask for confirmation before deleting files. Default is [false].");
+        "No interactive mode. Taking action without asking for confirmation. Default is [false].");
 
     private static readonly Option<string[]> ExtensionsOption = new(
         ["--extensions", "-e"],
         () => ["jpg", "jpeg", "png", "jfif"],
         "Extensions of files to dedup. Default is [jpg,jpeg,png,jfif].");
+    
+    private static readonly Option<int> ThreadsOption = new(
+        ["--threads", "-t"],
+        () => Environment.ProcessorCount,
+        $"Number of threads to use for image indexing. Default is {Environment.ProcessorCount}.");
    
     protected override IEnumerable<Option> GetCommandOptions()
     {
@@ -60,8 +65,9 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
             RecursiveOption,
             KeepOption,
             ActionOption,
-            InteractiveOption,
-            ExtensionsOption
+            YesOption,
+            ExtensionsOption,
+            ThreadsOption
         };
     }
 
@@ -73,8 +79,9 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
         var recursive = context.ParseResult.GetValueForOption(RecursiveOption);
         var keep = context.ParseResult.GetValueForOption(KeepOption);
         var action = context.ParseResult.GetValueForOption(ActionOption);
-        var interactive = context.ParseResult.GetValueForOption(InteractiveOption);
+        var yes = context.ParseResult.GetValueForOption(YesOption);
         var extensions = context.ParseResult.GetValueForOption(ExtensionsOption);
+        var threads = context.ParseResult.GetValueForOption(ThreadsOption);
         
         if (!(keep?.Any() ?? false)) throw new ArgumentException("At least one preference should be provided for --keep.");
         if (!(extensions?.Any() ?? false)) throw new ArgumentException("At least one extension should be provided for --extensions.");
@@ -85,6 +92,15 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
             .Services;
         
         var calendar = services.GetRequiredService<DedupEngine>();
-        await calendar.DedupAsync(path, similarityBar, recursive, keep, action, interactive, extensions, verbose);
+        await calendar.DedupAsync(
+            path: path,
+            similarityBar: similarityBar,
+            recursive: recursive,
+            keepPreferences: keep,
+            action: action,
+            interactive: !yes,
+            extensions: extensions,
+            verbose: verbose,
+            threads: threads);
     }
 }

@@ -9,7 +9,7 @@ namespace Aiursoft.NiBot.Dedup.Services;
 
 public class ImageHasher(ILogger<DedupEngine> logger, CanonPool canonPool)
 {
-    public async Task<MappedImage[]> MapImagesAsync(string[] imagePaths, bool showProgress)
+    public async Task<MappedImage[]> MapImagesAsync(string[] imagePaths, bool showProgress, int threads)
     {
         var hashAlgo = new PerceptualHash();
         ConcurrentBag<MappedImage> mappedImages = new();
@@ -42,7 +42,7 @@ public class ImageHasher(ILogger<DedupEngine> logger, CanonPool canonPool)
             });
         }
         
-        await canonPool.RunAllTasksInPoolAsync(Environment.ProcessorCount);
+        await canonPool.RunAllTasksInPoolAsync(threads);
         bar?.Dispose();
         
         var mappedImagesArray = mappedImages.ToArray();
