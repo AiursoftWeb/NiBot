@@ -1,4 +1,4 @@
-namespace NiBot.Dedup.Models;
+namespace Aiursoft.NiBot.Dedup.Models;
 
 public enum KeepPreference
 {

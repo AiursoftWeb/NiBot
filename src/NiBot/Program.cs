@@ -1,7 +1,7 @@
 ﻿using Aiursoft.CommandFramework;
 using Aiursoft.CommandFramework.Models;
-using NiBot.Calendar;
-using NiBot.Dedup;
+using Aiursoft.NiBot.Calendar;
+using Aiursoft.NiBot.Dedup;
 
 return await new NestedCommandApp()
     .WithGlobalOptions(CommonOptionsProvider.VerboseOption)

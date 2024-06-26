@@ -1,7 +1,7 @@
 ﻿using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace NiBot.Dedup.Util;
+namespace Aiursoft.NiBot.Dedup.Util;
 
 public static class GrayscaleChecker
 {

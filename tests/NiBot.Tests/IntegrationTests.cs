@@ -1,7 +1,7 @@
 ﻿using Aiursoft.CommandFramework;
 using Aiursoft.CommandFramework.Models;
+using Aiursoft.NiBot.Calendar;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NiBot.Calendar;
 
 namespace Aiursoft.NiBot.Tests;
 

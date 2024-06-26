@@ -1,9 +1,9 @@
 ﻿using Aiursoft.Canon;
 using Aiursoft.CommandFramework.Abstracts;
+using Aiursoft.NiBot.Dedup.Services;
 using Microsoft.Extensions.DependencyInjection;
-using NiBot.Dedup.Services;
 
-namespace NiBot.Dedup;
+namespace Aiursoft.NiBot.Dedup;
 
 public class Startup : IStartUp
 {

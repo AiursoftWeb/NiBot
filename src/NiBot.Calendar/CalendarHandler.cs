@@ -5,7 +5,7 @@ using Aiursoft.CommandFramework.Services;
 using Aiursoft.NiBot.Core;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace NiBot.Calendar;
+namespace Aiursoft.NiBot.Calendar;
 
 public class CalendarHandler : ExecutableCommandHandlerBuilder
 {

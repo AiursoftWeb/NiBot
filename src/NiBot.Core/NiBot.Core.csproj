@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <AssemblyName>NiBot.Core</AssemblyName>
+    <AssemblyName>Aiursoft.NiBot.Core</AssemblyName>
     <RootNamespace>Aiursoft.NiBot.Core</RootNamespace>
     <IsTestProject>false</IsTestProject>
     <IsPackable>false</IsPackable>

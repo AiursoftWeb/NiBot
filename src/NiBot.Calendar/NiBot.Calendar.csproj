@@ -2,8 +2,8 @@
     <PropertyGroup>
         <OutputType>Library</OutputType>
         <TargetFramework>net8.0</TargetFramework>
-        <AssemblyName>NiBot.Calendar</AssemblyName>
-        <RootNamespace>NiBot.Calendar</RootNamespace>
+        <AssemblyName>Aiursoft.NiBot.Calendar</AssemblyName>
+        <RootNamespace>Aiursoft.NiBot.Calendar</RootNamespace>
         <IsTestProject>false</IsTestProject>
         <IsPackable>false</IsPackable>
         <ImplicitUsings>enable</ImplicitUsings>

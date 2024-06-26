@@ -1,11 +1,11 @@
 using System.Collections.Concurrent;
 using Aiursoft.Canon;
 using Aiursoft.NiBot.Core;
+using Aiursoft.NiBot.Dedup.Models;
 using CoenM.ImageHash.HashAlgorithms;
 using Microsoft.Extensions.Logging;
-using NiBot.Dedup.Models;
 
-namespace NiBot.Dedup.Services;
+namespace Aiursoft.NiBot.Dedup.Services;
 
 public class ImageHasher(ILogger<DedupEngine> logger, CanonPool canonPool)
 {

@@ -1,10 +1,10 @@
 using System.Numerics;
+using Aiursoft.NiBot.Dedup.Util;
 using CoenM.ImageHash;
-using NiBot.Dedup.Util;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-namespace NiBot.Dedup.Models;
+namespace Aiursoft.NiBot.Dedup.Models;
 
 public class MappedImage
 {

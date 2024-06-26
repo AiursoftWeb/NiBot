@@ -1,10 +1,10 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Aiursoft.NiBot.Dedup.Models;
+using Aiursoft.NiBot.Dedup.Util;
 using Microsoft.Extensions.Logging;
-using NiBot.Dedup.Models;
-using NiBot.Dedup.Util;
 
-namespace NiBot.Dedup.Services;
+namespace Aiursoft.NiBot.Dedup.Services;
 
 public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
 {

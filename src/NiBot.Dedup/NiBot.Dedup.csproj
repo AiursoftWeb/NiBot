@@ -2,8 +2,8 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <AssemblyName>NiBot.Dedup</AssemblyName>
-    <RootNamespace>NiBot.Dedup</RootNamespace>
+    <AssemblyName>Aiursoft.NiBot.Dedup</AssemblyName>
+    <RootNamespace>Aiursoft.NiBot.Dedup</RootNamespace>
     <IsTestProject>false</IsTestProject>
     <IsPackable>false</IsPackable>
     <ImplicitUsings>enable</ImplicitUsings>
