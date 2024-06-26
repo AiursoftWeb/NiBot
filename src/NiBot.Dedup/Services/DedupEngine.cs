@@ -87,7 +87,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                         break;
                     case DuplicateAction.MoveToTrash:
                         await MoveToTrashAsync(photo, path, bestPhoto.PhysicalPath);
-                        logger.LogInformation("Moved {path} to trash.", photo.PhysicalPath);
+                        logger.LogInformation("Moved {path} to .trash folder.", photo.PhysicalPath);
                         break;
                     case DuplicateAction.Nothing:
                         logger.LogWarning("No action taken. If you want to delete or move the duplicate photos, please specify the action with --action.");
