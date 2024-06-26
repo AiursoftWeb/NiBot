@@ -173,6 +173,11 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
             Directory.CreateDirectory(trashFolder);
         }
         var trashPath = Path.Combine(trashFolder, Path.GetFileName(photo.PhysicalPath));
+        while (File.Exists(trashPath))
+        {
+            trashPath = Path.Combine(trashFolder, $"{Guid.NewGuid()}{Path.GetExtension(photo.PhysicalPath)}");
+        }
+        
         File.Move(photo.PhysicalPath, trashPath);
     }
 

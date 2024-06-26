@@ -24,32 +24,32 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
     private static readonly Option<int> SimilarityBar = new(
         ["--duplicate-similar", "-ds"],
         () => 96,
-        "Similarity bar. Default is [96]. This value means two image are considered as duplicates if their similarity is greater than it. Setting too small may cause different images to be considered as duplicates. Suggested values: [96-100]");
+        "Similarity bar. This value means two image are considered as duplicates if their similarity is greater than it. Setting too small may cause different images to be considered as duplicates. Suggested values: [96-100]");
      
     private static readonly Option<bool> RecursiveOption = new(
         ["--recursive", "-r"],
         () => false,
-        "Recursively search for similar images in subdirectories. Default is [false].");
+        "Recursively search for similar images in subdirectories.");
 
     private static readonly Option<KeepPreference[]> KeepOption = new(
         ["--keep", "-k"],
         () => [KeepPreference.Colorful, KeepPreference.HighestResolution, KeepPreference.Largest, KeepPreference.Newest],
-        "Preference for sorting images by quality to determine which to keep when duplicates are found. Default is [Colorful,HighestResolution,Largest,Newest]. Available options: Newest, Oldest, Smallest, Largest, HighestResolution, LowestResolution.");
+        "Preference for sorting images by quality to determine which to keep when duplicates are found. Available options: Colorful|GrayScale|Newest|Oldest|Smallest|Largest|HighestResolution|LowestResolution.");
 
     private static readonly Option<DuplicateAction> ActionOption = new(
         ["--action", "-a"],
         () => DuplicateAction.MoveToTrash,
-        "Action to take when duplicates are found. Default is [MoveToTrash]. Available options: Nothing, Delete, MoveToTrash.");
+        "Action to take when duplicates are found. Available options: Nothing, Delete, MoveToTrash.");
     
     private static readonly Option<bool> YesOption = new(
         ["--yes", "-y"],
         () => false,
-        "No interactive mode. Taking action without asking for confirmation. Default is [false].");
+        "No interactive mode. Taking action without asking for confirmation.");
 
     private static readonly Option<string[]> ExtensionsOption = new(
         ["--extensions", "-e"],
         () => ["jpg", "jpeg", "png", "jfif"],
-        "Extensions of files to dedup. Default is [jpg,jpeg,png,jfif].");
+        "Extensions of files to dedup.");
     
     private static readonly Option<int> ThreadsOption = new(
         ["--threads", "-t"],
