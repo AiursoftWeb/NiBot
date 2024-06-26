@@ -3,13 +3,13 @@
     <OutputType>Exe</OutputType>
     <Version>8.0.2</Version>
     <TargetFramework>net8.0</TargetFramework>
-    <AssemblyName>NiBot</AssemblyName>
+    <AssemblyName>nibot</AssemblyName>
     <RootNamespace>Aiursoft.NiBot</RootNamespace>
     <IsTestProject>false</IsTestProject>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <PackAsTool>true</PackAsTool>
-    <ToolCommandName>NiBot</ToolCommandName>
+    <ToolCommandName>nibot</ToolCommandName>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <SelfContained>false</SelfContained>
@@ -18,14 +18,14 @@
     <PublishSingleFile>false</PublishSingleFile>
     <Company>Aiursoft</Company>
     <Product>NiBot</Product>
-    <Authors>anduin2017 edgeneko</Authors>
+    <Authors>edgeneko anduin2017</Authors>
     <Description>A cli tool helps you to de-duplicate images in a folder.</Description>
     <PackageId>Aiursoft.NiBot</PackageId>
     <PackageTags>cli nuget dotnet tool image deduplication</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://gitlab.aiursoft.cn/Anduin/NiBot</PackageProjectUrl>
+    <PackageProjectUrl>https://gitlab.aiursoft.cn/Aiursoft/NiBot</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://gitlab.aiursoft.cn/Anduin/NiBot</RepositoryUrl>
+    <RepositoryUrl>https://gitlab.aiursoft.cn/Aiursoft/NiBot</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
