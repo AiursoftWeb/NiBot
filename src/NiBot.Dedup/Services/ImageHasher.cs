@@ -32,17 +32,3 @@ public class ImageHasher(ILogger<DedupEngine> logger, CanonPool canonPool)
         return mappedImages.ToArray();
     }
 }
-
-public static class ArrayExtensions
-{
-    public static IEnumerable<(T left, T right)> YieldPairs<T>(this T[] array)
-    {
-        for (var i = 0; i < array.Length; i++)
-        {
-            for (var j = i + 1; j < array.Length; j++)
-            {
-                yield return (array[i], array[j]);
-            }
-        }
-    }
-}

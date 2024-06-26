@@ -15,7 +15,7 @@ public class DisjointSetUnion(int size)
         _pa[Find(a)] = Find(b);
     }
 
-    public List<List<int>> AsGroups(bool ignoreSingletons = false)
+    public IEnumerable<List<int>> AsGroups(bool ignoreSingletons = false)
     {
         var groups = new Dictionary<int, List<int>>();
         for (var i = 0; i < _pa.Length; i++)
