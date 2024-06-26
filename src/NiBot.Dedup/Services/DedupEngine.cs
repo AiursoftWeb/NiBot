@@ -17,8 +17,6 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         var images = files
             .Where(file => extensions.Any(ext =>
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
-            // .Reverse()
-            // .Take(200)
             .ToArray();
 
         logger.LogTrace("Found {Count} images in {path}. Calculating hashes...", images.Length, path);
@@ -29,15 +27,16 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         var imageTree = new VpTree<MappedImage>((MappedImage[])mappedImages.Clone(), (x, y) => x.ImageDiff(y));
         logger.LogTrace("VPTree built.");
         
-        Dsu dsu = new(mappedImages.Length);
+        var dsu = new DisjointSetUnion(mappedImages.Length);
         foreach (var item in mappedImages)
         {
             var matches = imageTree.SearchByMaxDist(item, maxDistance);
             matches.ForEach(t => dsu.Union(item.Id, t.Item1.Id));
         }
         
-        logger.LogTrace("Dsu built.");
+        logger.LogTrace("DisjointSetUnion built.");
         
+        // ReSharper disable once UnusedVariable
         var finalResult = dsu.AsGroups(true).Select(t1 => t1.Select(t2 => mappedImages[t2]).ToList()).ToList();
         
         
@@ -108,6 +107,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         // }
     }
 
+    // ReSharper disable once UnusedMember.Local
     private void PreviewImage(string path)
     {
         // Open the image in a window.

@@ -1,15 +1,10 @@
 ﻿namespace NiBot.Dedup.Util;
 
-public class Dsu
+public class DisjointSetUnion(int size)
 {
-    private readonly int[] _pa;
+    private readonly int[] _pa = Enumerable.Range(0, size).ToArray();
 
-    public Dsu(int size)
-    {
-        _pa = Enumerable.Range(0, size).ToArray();
-    }
-
-    public int Find(int elem)
+    private int Find(int elem)
     {
         return _pa[elem] == elem ? elem : _pa[elem] = Find(_pa[elem]);
     }
