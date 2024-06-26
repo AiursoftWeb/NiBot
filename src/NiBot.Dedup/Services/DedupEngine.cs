@@ -66,17 +66,17 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
             {
                 PreviewImage(bestPhoto.PhysicalPath);
 
-                logger.LogInformation("Grayscale {grayscale}. Resolution {resolution}. Size {size}. File name {fileName} is previewing as best photo. Press any key to preview duplicates.", bestPhoto.IsGrayscale, bestPhoto.Resolution, bestPhoto.Size, bestPhoto.PhysicalPath);
-                Console.ReadKey();
+                logger.LogInformation("Grayscale {grayscale}. Resolution {resolution}. Size {size}. File name {fileName} is previewing as best photo. Press ENTER to preview duplicates.", bestPhoto.IsGrayscale, bestPhoto.Resolution, bestPhoto.Size, bestPhoto.PhysicalPath);
+                Console.ReadLine();
             }
 
             foreach (var photo in group.Where(photo => photo != bestPhoto))
             {
                 if (interactive)
                 {
-                    logger.LogInformation("Grayscale {grayscale}. Resolution {resolution}. Size {size}. File name {fileName} is previewing as duplicate photo. Press any key to do {action}.", photo.IsGrayscale, photo.Resolution, photo.Size, photo.PhysicalPath, action);
+                    logger.LogInformation("Grayscale {grayscale}. Resolution {resolution}. Size {size}. File name {fileName} is previewing as duplicate photo. Press ENTER to do {action}.", photo.IsGrayscale, photo.Resolution, photo.Size, photo.PhysicalPath, action);
                     PreviewImage(photo.PhysicalPath);
-                    Console.ReadKey();
+                    Console.ReadLine();
                 }
 
                 switch (action)
