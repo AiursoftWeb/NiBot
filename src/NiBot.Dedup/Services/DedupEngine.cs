@@ -94,6 +94,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                         logger.LogInformation("Moved {path} to trash.", photo.PhysicalPath);
                         break;
                     case DuplicateAction.Nothing:
+                        logger.LogWarning("No action taken. If you want to delete or move the duplicate photos, please specify the action with --action.");
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), action, null);

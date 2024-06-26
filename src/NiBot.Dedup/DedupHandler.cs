@@ -24,32 +24,32 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
     private static readonly Option<int> SimilarityBar = new(
         ["--duplicate-similar", "-ds"],
         () => 99,
-        "Similarity bar. Default is 99. This value means two image are considered as duplicates if their similarity is greater than 99%. Setting too small may cause different images to be considered as duplicates.");
+        "Similarity bar. Default is [99]. This value means two image are considered as duplicates if their similarity is greater than 99%. Setting too small may cause different images to be considered as duplicates.");
      
     private static readonly Option<bool> RecursiveOption = new(
         ["--recursive", "-r"],
         () => false,
-        "Recursively search for similar images in subdirectories. Default is false.");
+        "Recursively search for similar images in subdirectories. Default is [false].");
 
     private static readonly Option<KeepPreference[]> KeepOption = new(
         ["--keep", "-k"],
         () => [KeepPreference.Colorful, KeepPreference.HighestResolution, KeepPreference.Largest, KeepPreference.Newest],
-        "Preference for sorting images by quality to determine which to keep when duplicates are found. Default is [HighestResolution,Largest,Newest]. Available options: Newest, Oldest, Smallest, Largest, HighestResolution, LowestResolution.");
+        "Preference for sorting images by quality to determine which to keep when duplicates are found. Default is [Colorful,HighestResolution,Largest,Newest]. Available options: Newest, Oldest, Smallest, Largest, HighestResolution, LowestResolution.");
 
     private static readonly Option<DuplicateAction> ActionOption = new(
         ["--action", "-a"],
         () => DuplicateAction.Nothing,
-        "Action to take when duplicates are found. Default is Delete. Available options: Nothing, Delete, MoveToTrash, MoveAndCopyOriginalToTrash.");
+        "Action to take when duplicates are found. Default is [Nothing]. Available options: Nothing, Delete, MoveToTrash, MoveAndCopyOriginalToTrash.");
     
     private static readonly Option<bool> InteractiveOption = new(
         ["--interactive", "-i"],
         () => false,
-        "Interactive mode. Ask for confirmation before deleting files. Default is false.");
+        "Interactive mode. Ask for confirmation before deleting files. Default is [false].");
 
     private static readonly Option<string[]> ExtensionsOption = new(
         ["--extensions", "-e"],
         () => ["jpg", "jpeg", "png", "jfif"],
-        "Extensions of files to dedup. Default is jpg, jpeg, png, jfif.");
+        "Extensions of files to dedup. Default is [jpg,jpeg,png,jfif].");
    
     protected override IEnumerable<Option> GetCommandOptions()
     {
