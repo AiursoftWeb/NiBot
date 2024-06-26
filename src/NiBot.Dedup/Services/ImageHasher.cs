@@ -44,6 +44,13 @@ public class ImageHasher(ILogger<DedupEngine> logger, CanonPool canonPool)
         
         await canonPool.RunAllTasksInPoolAsync(Environment.ProcessorCount);
         bar?.Dispose();
-        return mappedImages.ToArray();
+        
+        var mappedImagesArray = mappedImages.ToArray();
+        // Set the ID as the index. This is essential for building DSU.
+        for (var i = 0; i < mappedImagesArray.Length; i++)
+        {
+            mappedImagesArray[i].Id = i;
+        }
+        return mappedImagesArray;
     }
 }

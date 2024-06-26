@@ -22,14 +22,12 @@ public static class GrayscaleChecker
                 }
             }
         }
-        //return 100 * differentPixelCount < 2 * totalPixelCount;
-        //return differentPixelCount / (double)totalPixelCount < 0.03;
-        return differentPixelCount < (totalPixelCount >> 6); // If less than 1/64 pixels are different, it's grayscale.
+        return differentPixelCount < (totalPixelCount >> 8); // If less than 0x100 pixels are different, it's grayscale.
     }
     
     private static bool DifferentColorNumber(byte rgbValueLeft, byte rgbValueRight)
     {
-        // If a pixel has a difference of more than 30 between two of its RGB values, it's not grayscale.
-        return Math.Abs(rgbValueLeft - rgbValueRight) > 30;
+        // If a pixel has a difference of more than 0x20 between two of its RGB values, it's not grayscale.
+        return Math.Abs(rgbValueLeft - rgbValueRight) >> 5 > 0;
     }
 }

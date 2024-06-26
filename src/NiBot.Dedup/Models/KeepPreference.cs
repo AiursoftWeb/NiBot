@@ -24,8 +24,8 @@ public static class ConvertKeepPreferenceToExpression
             KeepPreference.Smallest => t => long.MaxValue - t.Size,
             KeepPreference.HighestResolution => t => t.Resolution,
             KeepPreference.LowestResolution => t => -1 * t.Resolution,
-            KeepPreference.GrayScale => t => t.IsGrayscale ? 0 : 1,
-            KeepPreference.Colorful => t => t.IsGrayscale ? 1 : 0,
+            KeepPreference.GrayScale => t => t.IsGrayscale ? 1 : 0,
+            KeepPreference.Colorful => t => t.IsGrayscale ? 0 : 1,
             _ => throw new ArgumentOutOfRangeException(nameof(preference), preference, null)
         };
     }    
