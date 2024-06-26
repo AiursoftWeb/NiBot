@@ -54,9 +54,14 @@ public class MappedImage
     {
         return PhysicalPath;
     }
+    
+    public double ImageDiffRatio(MappedImage other)
+    {
+        return (64 - ImageDiff(other)) / 64.0; // 0 - 1.
+    }
 
     public int ImageDiff(MappedImage other)
     {
-        return BitOperations.PopCount(Hash ^ other.Hash);
+        return BitOperations.PopCount(Hash ^ other.Hash); // 0 - 64.
     }
 }
