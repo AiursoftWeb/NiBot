@@ -76,8 +76,8 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
         var interactive = context.ParseResult.GetValueForOption(InteractiveOption);
         var extensions = context.ParseResult.GetValueForOption(ExtensionsOption);
         
-        if (!keep?.Any() ?? true) throw new ArgumentException("At least one preference should be provided for --keep.");
-        if (!extensions?.Any() ?? true) throw new ArgumentException("At least one extension should be provided for --extensions.");
+        if (!(keep?.Any() ?? false)) throw new ArgumentException("At least one preference should be provided for --keep.");
+        if (!(extensions?.Any() ?? false)) throw new ArgumentException("At least one extension should be provided for --extensions.");
         
         var services = ServiceBuilder
             .CreateCommandHostBuilder<Startup>(verbose)

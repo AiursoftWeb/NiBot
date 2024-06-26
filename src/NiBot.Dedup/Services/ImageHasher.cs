@@ -31,6 +31,7 @@ public class ImageHasher(ILogger<DedupEngine> logger, CanonPool canonPool)
                     if (showProgress)
                     {
                         Interlocked.Increment(ref completedTasks);
+                        // ReSharper disable once AccessToDisposedClosure
                         bar?.Report((double)completedTasks / totalTasks);
                     }
                 }

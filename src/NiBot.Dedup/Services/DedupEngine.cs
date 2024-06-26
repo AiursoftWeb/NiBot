@@ -10,9 +10,10 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
 {
     public async Task DedupAsync(string path, int similarityBar, bool recursive, KeepPreference[] keepPreferences, DuplicateAction action, bool interactive, string[] extensions, bool verbose)
     {
-        logger.LogInformation("Start de-duplicating images in {path}. Minimum similarity bar is {similarityBar}. Recursive: {recursive}. Keep: {keepPreferences}. Action: {action}. Interactive: {interactive}. Extensions: {extensions}.",
+        logger.LogTrace("Start de-duplicating images in {path}. Minimum similarity bar is {similarityBar}. Recursive: {recursive}. Keep: {keepPreferences}. Action: {action}. Interactive: {interactive}. Extensions: {extensions}.",
             path, similarityBar, recursive, keepPreferences, action, interactive, string.Join(", ", extensions));
-        var files = Directory.GetFiles(path, "*.*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+        var files = Directory.GetFiles(path, "*.*",
+            recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
         var images = files
             .Where(file => extensions.Any(ext =>
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
@@ -20,7 +21,10 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
 
         logger.LogInformation("Found {Count} images in {path}. Calculating hashes...", images.Length, path);
         var mappedImages = await imageHasher.MapImagesAsync(images, showProgress: !verbose);
-        var imageGroups = BuildImageGroups(mappedImages, similarityBar);
+        
+        logger.LogInformation("Calculating duplicates...");
+        var imageGroups = BuildImageGroups(mappedImages, similarityBar).ToArray();
+        logger.LogInformation("Found {Count} duplicate groups and totally {Total} duplicate pictures.", imageGroups.Length, imageGroups.Sum(t => t.Length));
 
         foreach (var group in imageGroups)
         {
@@ -29,7 +33,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
             query = keepPreferences.Skip(1).Aggregate(query, (current, keepPreference) => current.ThenByDescending(ConvertKeepPreferenceToExpression.Convert(keepPreference)));
             var bestPhoto = query.First();
             
-            logger.LogInformation("Found {Count} duplicates pictures.", group.Count);
+            logger.LogInformation("Found {Count} duplicates pictures.", group.Length);
             PreviewImage(bestPhoto.PhysicalPath);
             
             logger.LogInformation("Previewing the best photo {path}. Grayscale {grayscale}. Press any key to continue.", bestPhoto.PhysicalPath, bestPhoto.IsGrayscale);
@@ -110,7 +114,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         // }
     }
     
-    private List<List<MappedImage>> BuildImageGroups(MappedImage[] mappedImages, int similarityBar)
+    private IEnumerable<MappedImage[]> BuildImageGroups(MappedImage[] mappedImages, int similarityBar)
     {
         var maxDistance = 64 - (int)Math.Round(64 * similarityBar / 100.0) + 1; // VPTree search doesn't cover the upper bound, so +1.
         var imageTree = new VpTree<MappedImage>((MappedImage[])mappedImages.Clone(), (x, y) => x.ImageDiff(y));
@@ -120,7 +124,9 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
             var matches = imageTree.SearchByMaxDist(item, maxDistance);
             matches.ForEach(t => dsu.Union(item.Id, t.Item1.Id));
         }
-        return dsu.AsGroups(true).Select(t1 => t1.Select(t2 => mappedImages[t2]).ToList()).ToList();
+
+        return dsu.AsGroups(true)
+            .Select(groupImgIds => groupImgIds.Select(groupImgId => mappedImages[groupImgId]).ToArray());
     }
 
     // ReSharper disable once UnusedMember.Local

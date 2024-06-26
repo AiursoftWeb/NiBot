@@ -39,6 +39,6 @@ public class DisjointSetUnion(int size)
                 value.Add(id);
             }
         }
-        return groups.Values.ToList();
+        return groups.Values;
     }
 }
