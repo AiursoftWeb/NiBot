@@ -23,8 +23,8 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
     
     private static readonly Option<int> SimilarityBar = new(
         ["--duplicate-similar", "-ds"],
-        () => 99,
-        "Similarity bar. Default is [99]. This value means two image are considered as duplicates if their similarity is greater than 99%. Setting too small may cause different images to be considered as duplicates.");
+        () => 96,
+        "Similarity bar. Default is [96]. This value means two image are considered as duplicates if their similarity is greater than it. Setting too small may cause different images to be considered as duplicates. Suggested values: [96-100]");
      
     private static readonly Option<bool> RecursiveOption = new(
         ["--recursive", "-r"],
