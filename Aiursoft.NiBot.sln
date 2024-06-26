@@ -3,19 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32228.430
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NiBot", "src\NiBot\Aiursoft.NiBot.csproj", "{8FEE1063-F750-43EE-8124-6A7A85BB3531}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NiBot", "src\Aiursoft.NiBot\Aiursoft.NiBot.csproj", "{8FEE1063-F750-43EE-8124-6A7A85BB3531}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NiBot.Core", "src\NiBot.Core\Aiursoft.NiBot.Core.csproj", "{8BB6EA69-6487-4709-B329-65B2F26DBDC2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NiBot.Core", "src\Aiursoft.NiBot.Core\Aiursoft.NiBot.Core.csproj", "{8BB6EA69-6487-4709-B329-65B2F26DBDC2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C3378506-CFC5-4A6D-BF31-E34D2F49830A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{00C03649-1C34-421C-8399-2F6323C41E39}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NiBot.Tests", "tests\NiBot.Tests\Aiursoft.NiBot.Tests.csproj", "{C4E0DD67-7F60-4EFB-8684-47A0EF8BEE4A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NiBot.Tests", "tests\Aiursoft.NiBot.Tests\Aiursoft.NiBot.Tests.csproj", "{C4E0DD67-7F60-4EFB-8684-47A0EF8BEE4A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aiursoft.NiBot.Calendar", "src\NiBot.Calendar\Aiursoft.NiBot.Calendar.csproj", "{0CB8CF7F-7A3F-41F7-8863-50562421B014}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aiursoft.NiBot.Calendar", "src\Aiursoft.NiBot.Calendar\Aiursoft.NiBot.Calendar.csproj", "{0CB8CF7F-7A3F-41F7-8863-50562421B014}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aiursoft.NiBot.Dedup", "src\NiBot.Dedup\Aiursoft.NiBot.Dedup.csproj", "{F4DCA6D7-0E4C-413F-846B-71A2899FFC52}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aiursoft.NiBot.Dedup", "src\Aiursoft.NiBot.Dedup\Aiursoft.NiBot.Dedup.csproj", "{F4DCA6D7-0E4C-413F-846B-71A2899FFC52}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
