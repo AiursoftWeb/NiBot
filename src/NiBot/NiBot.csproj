@@ -18,10 +18,10 @@
     <PublishSingleFile>false</PublishSingleFile>
     <Company>Aiursoft</Company>
     <Product>NiBot</Product>
-    <Authors>anduin2017</Authors>
-    <Description>A cli tool project helps to re-encode and save all videos under a path.</Description>
+    <Authors>anduin2017 edgeneko</Authors>
+    <Description>A cli tool helps you to de-duplicate images in a folder.</Description>
     <PackageId>Aiursoft.NiBot</PackageId>
-    <PackageTags>cli nuget dotnet ffmpeg</PackageTags>
+    <PackageTags>cli nuget dotnet tool image deduplication</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://gitlab.aiursoft.cn/Anduin/NiBot</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
