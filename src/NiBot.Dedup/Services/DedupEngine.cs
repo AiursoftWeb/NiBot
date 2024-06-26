@@ -86,7 +86,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                         logger.LogInformation("Deleted {path}.", photo.PhysicalPath);
                         break;
                     case DuplicateAction.MoveToTrash:
-                        MoveToTrash(photo, path);
+                        await MoveToTrashAsync(photo, path, bestPhoto.PhysicalPath);
                         logger.LogInformation("Moved {path} to trash.", photo.PhysicalPath);
                         break;
                     case DuplicateAction.Nothing:
@@ -97,75 +97,9 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                 }
             }
         }
-        
-        // var results = mappedImages.YieldPairs()
-        //     .Select(pair => new CompareResult(pair.left, pair.right))
-        //     .OrderByDescending(r => r.Similarity)
-        //     .Where(t => t.Similarity * 100 >= similarityBar);
-        //
-        // foreach (var duplicatePair in results)
-        // {
-        //     logger.LogInformation($"Found duplicate pair: {duplicatePair.Left} and {duplicatePair.Right} with similarity {duplicatePair.Similarity * 100}%.");
-        //     var shouldTakeAction = true;
-        //     if (interactive) // In interactive mode, ask for user input.
-        //     {
-        //         PreviewImage(duplicatePair.Left.PhysicalPath);
-        //         PreviewImage(duplicatePair.Right.PhysicalPath);
-        //         while (true)
-        //         {
-        //             Console.WriteLine("Do you want to delete one of them? (y/n)");
-        //             var key = Console.ReadKey();
-        //             if (key.Key == ConsoleKey.Y)
-        //             {
-        //                 shouldTakeAction = true;
-        //                 break;
-        //             }
-        //             if (key.Key == ConsoleKey.N)
-        //             {
-        //                 shouldTakeAction = false;
-        //                 break;
-        //             }
-        //         }
-        //     }
-        //     
-        //     if (shouldTakeAction)
-        //     {
-        //         // Respect the keepPreferences argument.
-        //         // var thePhotoShouldBeTakenAction = keepPreferences switch
-        //         // {
-        //         //     KeepPreference.Newest => duplicatePair.Left.CreationTime < duplicatePair.Right.CreationTime,
-        //         //     KeepPreference.Oldest => duplicatePair.Left.CreationTime > duplicatePair.Right.CreationTime,
-        //         //     KeepPreference.Smallest => duplicatePair.Left.Length > duplicatePair.Right.Length,
-        //         //     KeepPreference.Largest => duplicatePair.Left.Length < duplicatePair.Right.Length,
-        //         //     KeepPreference.HighestResolution => duplicatePair.Left.Width * duplicatePair.Left.Height < duplicatePair.Right.Width * duplicatePair.Right.Height,
-        //         //     KeepPreference.LowestResolution => duplicatePair.Left.Width * duplicatePair.Left.Height > duplicatePair.Right.Width * duplicatePair.Right.Height,
-        //         //     _ => throw new ArgumentOutOfRangeException()
-        //         // };
-        //         
-        //         switch (action)
-        //         {
-        //             case DuplicateAction.Nothing:
-        //                 logger.LogInformation("No action taken.");
-        //                 break;
-        //             case DuplicateAction.Delete:
-        //                 logger.LogInformation("Deleted {path}.", duplicatePair.Right.PhysicalPath);
-        //                 break;
-        //             case DuplicateAction.MoveToTrash:
-        //                 var trashFolder = Path.Combine(path, ".trash");
-        //                 if (!Directory.Exists(trashFolder))
-        //                 {
-        //                     Directory.CreateDirectory(trashFolder);
-        //                 }
-        //                 var trashPath = Path.Combine(trashFolder, Path.GetFileName(duplicatePair.Right.PhysicalPath));
-        //                 File.Move(duplicatePair.Right.PhysicalPath, trashPath);
-        //                 logger.LogInformation("Moved {path} to trash.", duplicatePair.Right.PhysicalPath);
-        //                 break;
-        //         }
-        //     }
-        // }
     }
 
-    private void MoveToTrash(MappedImage photo, string path)
+    private async Task MoveToTrashAsync(MappedImage photo, string path, string duplicateSourceFile)
     {
         var trashFolder = Path.Combine(path, ".trash");
         if (!Directory.Exists(trashFolder))
@@ -177,8 +111,10 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         {
             trashPath = Path.Combine(trashFolder, $"{Guid.NewGuid()}{Path.GetExtension(photo.PhysicalPath)}");
         }
-        
         File.Move(photo.PhysicalPath, trashPath);
+        var message = $"The file {trashPath} is moved here as trash because it's a duplicate of {duplicateSourceFile}.";
+        var messageFile = Path.Combine(trashFolder, $".duplicateReasons.txt");
+        await File.AppendAllTextAsync(messageFile, message + Environment.NewLine);
     }
 
     private IEnumerable<MappedImage[]> BuildImageGroups(MappedImage[] mappedImages, int similarityBar)
