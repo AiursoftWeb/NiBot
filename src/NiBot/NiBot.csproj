@@ -20,7 +20,7 @@
     <Product>NiBot</Product>
     <Authors>anduin2017</Authors>
     <Description>A cli tool project helps to re-encode and save all videos under a path.</Description>
-    <PackageId>NiBot</PackageId>
+    <PackageId>Aiursoft.NiBot</PackageId>
     <PackageTags>cli nuget dotnet ffmpeg</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://gitlab.aiursoft.cn/Anduin/NiBot</PackageProjectUrl>
