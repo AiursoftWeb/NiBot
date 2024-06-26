@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <Version>8.0.9</Version>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>nibot</AssemblyName>
+    <RootNamespace>Aiursoft.NiBot</RootNamespace>
+    <IsTestProject>false</IsTestProject>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>nibot</ToolCommandName>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <SelfContained>false</SelfContained>
+    <PublishTrimmed>false</PublishTrimmed>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <PublishSingleFile>false</PublishSingleFile>
+    <Company>Aiursoft</Company>
+    <Product>NiBot</Product>
+    <Authors>edgeneko anduin2017</Authors>
+    <Description>A cli tool helps you to de-duplicate images in a folder.</Description>
+    <PackageId>Aiursoft.NiBot</PackageId>
+    <PackageTags>cli nuget dotnet tool image deduplication</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://gitlab.aiursoft.cn/Aiursoft/NiBot</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://gitlab.aiursoft.cn/Aiursoft/NiBot</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="." />
+    <ProjectReference Include="..\Aiursoft.NiBot.Calendar\Aiursoft.NiBot.Calendar.csproj" />
+    <ProjectReference Include="..\Aiursoft.NiBot.Dedup\Aiursoft.NiBot.Dedup.csproj" />
+  </ItemGroup>
+</Project>
