@@ -2,8 +2,9 @@ using System.Collections.Concurrent;
 using Aiursoft.Canon;
 using CoenM.ImageHash.HashAlgorithms;
 using Microsoft.Extensions.Logging;
+using NiBot.Dedup.Models;
 
-namespace Aiursoft.NiBot.Core;
+namespace NiBot.Dedup.Services;
 
 public class ImageHasher(ILogger<DedupEngine> logger, CanonPool canonPool)
 {

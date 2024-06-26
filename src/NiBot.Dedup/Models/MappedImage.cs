@@ -1,9 +1,13 @@
+using System.Numerics;
 using CoenM.ImageHash;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
-namespace Aiursoft.NiBot.Core;
+namespace NiBot.Dedup.Models;
 
 public class MappedImage
 {
+    public int Id { get; set; }
     public string PhysicalPath { get; }
     public ulong Hash { get; }
 
@@ -26,5 +30,10 @@ public class MappedImage
     public override string ToString()
     {
         return PhysicalPath;
+    }
+
+    public int ImageDiff(MappedImage other)
+    {
+        return BitOperations.PopCount(Hash ^ other.Hash);
     }
 }
