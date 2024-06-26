@@ -78,7 +78,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                 {
                     logger.LogInformation(
                         "Previewing the duplicate photo {path}. Grayscale {grayscale}. Resolution {resolution}. Size {size} Press any key to do {action}.",
-                        photo.PhysicalPath, photo.IsGrayscale, bestPhoto.Resolution, bestPhoto.Size, action);
+                        photo.PhysicalPath, photo.IsGrayscale, photo.Resolution, photo.Size, action);
                     PreviewImage(photo.PhysicalPath);
                     Console.ReadKey();
                 }
