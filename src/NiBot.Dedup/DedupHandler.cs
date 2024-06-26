@@ -31,10 +31,10 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
         () => false,
         "Recursively search for similar images in subdirectories. Default is false.");
 
-    private static readonly Option<KeepPreference> KeepOption = new(
+    private static readonly Option<KeepPreference[]> KeepOption = new(
         ["--keep", "-k"],
-        () => KeepPreference.HighestResolution,
-        "Preference for which image to keep when duplicates are found. Default is HighestResolution. Available options: Newest, Oldest, Smallest, Largest, HighestResolution, LowestResolution.");
+        () => [KeepPreference.Colorful, KeepPreference.HighestResolution, KeepPreference.Largest, KeepPreference.Newest],
+        "Preference for sorting images by quality to determine which to keep when duplicates are found. Default is [HighestResolution,Largest,Newest]. Available options: Newest, Oldest, Smallest, Largest, HighestResolution, LowestResolution.");
 
     private static readonly Option<DuplicateAction> ActionOption = new(
         ["--action", "-a"],
@@ -74,7 +74,10 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
         var keep = context.ParseResult.GetValueForOption(KeepOption);
         var action = context.ParseResult.GetValueForOption(ActionOption);
         var interactive = context.ParseResult.GetValueForOption(InteractiveOption);
-        var extensions = context.ParseResult.GetValueForOption(ExtensionsOption)!;
+        var extensions = context.ParseResult.GetValueForOption(ExtensionsOption);
+        
+        if (!keep?.Any() ?? true) throw new ArgumentException("At least one preference should be provided for --keep.");
+        if (!extensions?.Any() ?? true) throw new ArgumentException("At least one extension should be provided for --extensions.");
         
         var services = ServiceBuilder
             .CreateCommandHostBuilder<Startup>(verbose)
@@ -82,6 +85,6 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
             .Services;
         
         var calendar = services.GetRequiredService<DedupEngine>();
-        await calendar.DedupAsync(path, similarityBar, recursive, keep, action, interactive, extensions);
+        await calendar.DedupAsync(path, similarityBar, recursive, keep, action, interactive, extensions, verbose);
     }
 }

@@ -8,37 +8,40 @@ namespace NiBot.Dedup.Services;
 
 public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
 {
-    public async Task DedupAsync(string path, int similarityBar, bool recursive, KeepPreference keep, DuplicateAction action, bool interactive, string[] extensions)
+    public async Task DedupAsync(string path, int similarityBar, bool recursive, KeepPreference[] keepPreferences, DuplicateAction action, bool interactive, string[] extensions, bool verbose)
     {
-        logger.LogInformation("Start de-duplicating images in {path}. Minimum similarity bar is {similarityBar}. Recursive: {recursive}. Keep: {keep}. Action: {action}. Interactive: {interactive}. Extensions: {extensions}.",
-            path, similarityBar, recursive, keep, action, interactive, string.Join(", ", extensions));
-        var maxDistance = 64 - (int)Math.Round(64 * similarityBar / 100.0) + 1; // VPTree search doesn't cover the upper bound, so +1.
+        logger.LogInformation("Start de-duplicating images in {path}. Minimum similarity bar is {similarityBar}. Recursive: {recursive}. Keep: {keepPreferences}. Action: {action}. Interactive: {interactive}. Extensions: {extensions}.",
+            path, similarityBar, recursive, keepPreferences, action, interactive, string.Join(", ", extensions));
         var files = Directory.GetFiles(path, "*.*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
         var images = files
             .Where(file => extensions.Any(ext =>
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
             .ToArray();
 
-        logger.LogTrace("Found {Count} images in {path}. Calculating hashes...", images.Length, path);
-        var mappedImages = await imageHasher.MapImagesAsync(images);
-        for (var i = 0; i < mappedImages.Length; i++) mappedImages[i].Id = i;
-        
-        logger.LogTrace("Calculating similarity...");
-        var imageTree = new VpTree<MappedImage>((MappedImage[])mappedImages.Clone(), (x, y) => x.ImageDiff(y));
-        logger.LogTrace("VPTree built.");
-        
-        var dsu = new DisjointSetUnion(mappedImages.Length);
-        foreach (var item in mappedImages)
+        logger.LogInformation("Found {Count} images in {path}. Calculating hashes...", images.Length, path);
+        var mappedImages = await imageHasher.MapImagesAsync(images, showProgress: !verbose);
+        var imageGroups = BuildImageGroups(mappedImages, similarityBar);
+
+        foreach (var group in imageGroups)
         {
-            var matches = imageTree.SearchByMaxDist(item, maxDistance);
-            matches.ForEach(t => dsu.Union(item.Id, t.Item1.Id));
+            // TODO: Move this to a helper class for getting best photo.
+            var query = group.OrderByDescending(ConvertKeepPreferenceToExpression.Convert(keepPreferences.First()));
+            query = keepPreferences.Skip(1).Aggregate(query, (current, keepPreference) => current.ThenByDescending(ConvertKeepPreferenceToExpression.Convert(keepPreference)));
+            var bestPhoto = query.First();
+            
+            logger.LogInformation("Found {Count} duplicates pictures.", group.Count);
+            PreviewImage(bestPhoto.PhysicalPath);
+            
+            logger.LogInformation("Previewing the best photo {path}. Grayscale {grayscale}. Press any key to continue.", bestPhoto.PhysicalPath, bestPhoto.IsGrayscale);
+            Console.ReadKey();
+            foreach (var photo in group.Where(photo => photo != bestPhoto))
+            {
+                logger.LogInformation("Previewing the duplicate photo {path}. Grayscale {grayscale}. Press any key to continue.", photo.PhysicalPath, photo.IsGrayscale);
+                PreviewImage(photo.PhysicalPath);
+                Console.ReadKey();
+                //File.Delete(photo.PhysicalPath);
+            }
         }
-        
-        logger.LogTrace("DisjointSetUnion built.");
-        
-        // ReSharper disable once UnusedVariable
-        var finalResult = dsu.AsGroups(true).Select(t1 => t1.Select(t2 => mappedImages[t2]).ToList()).ToList();
-        
         
         // var results = mappedImages.YieldPairs()
         //     .Select(pair => new CompareResult(pair.left, pair.right))
@@ -72,8 +75,8 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         //     
         //     if (shouldTakeAction)
         //     {
-        //         // Respect the keep argument.
-        //         // var thePhotoShouldBeTakenAction = keep switch
+        //         // Respect the keepPreferences argument.
+        //         // var thePhotoShouldBeTakenAction = keepPreferences switch
         //         // {
         //         //     KeepPreference.Newest => duplicatePair.Left.CreationTime < duplicatePair.Right.CreationTime,
         //         //     KeepPreference.Oldest => duplicatePair.Left.CreationTime > duplicatePair.Right.CreationTime,
@@ -105,6 +108,19 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         //         }
         //     }
         // }
+    }
+    
+    private List<List<MappedImage>> BuildImageGroups(MappedImage[] mappedImages, int similarityBar)
+    {
+        var maxDistance = 64 - (int)Math.Round(64 * similarityBar / 100.0) + 1; // VPTree search doesn't cover the upper bound, so +1.
+        var imageTree = new VpTree<MappedImage>((MappedImage[])mappedImages.Clone(), (x, y) => x.ImageDiff(y));
+        var dsu = new DisjointSetUnion(mappedImages.Length);
+        foreach (var item in mappedImages)
+        {
+            var matches = imageTree.SearchByMaxDist(item, maxDistance);
+            matches.ForEach(t => dsu.Union(item.Id, t.Item1.Id));
+        }
+        return dsu.AsGroups(true).Select(t1 => t1.Select(t2 => mappedImages[t2]).ToList()).ToList();
     }
 
     // ReSharper disable once UnusedMember.Local

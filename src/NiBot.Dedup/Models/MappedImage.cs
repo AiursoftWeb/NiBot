@@ -1,5 +1,6 @@
 using System.Numerics;
 using CoenM.ImageHash;
+using NiBot.Dedup.Util;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
@@ -10,11 +11,33 @@ public class MappedImage
     public int Id { get; set; }
     public string PhysicalPath { get; }
     public ulong Hash { get; }
+    public long Size { get; }
+    public long Resolution { get; }
+    public DateTime LastWriteTime { get; }
+    public bool IsGrayscale { get; }
 
     private MappedImage(string physicalPath, ulong hash)
     {
         PhysicalPath = physicalPath;
         Hash = hash;
+        
+        // Get the file size.
+        var file = new FileInfo(physicalPath);
+        if (!file.Exists)
+        {
+            throw new FileNotFoundException("File not found", physicalPath);
+        }
+        Size = file.Length;
+        
+        // Get the last write time.
+        LastWriteTime = file.LastWriteTime;
+        
+        // Load the image to get the resolution.
+        using var img = Image.Load<Rgba32>(physicalPath);
+        Resolution = img.Width * img.Height;
+        
+        // Load the image to check if it's colored or white/black.
+        IsGrayscale = GrayscaleChecker.IsImageGrayscale(img, Resolution);
     }
     
     public static Task<MappedImage> CreateAsync(string physicalPath, IImageHash hashAlgo)
