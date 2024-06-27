@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using Aiursoft.Canon;
-using Aiursoft.NiBot.Core;
+using Aiursoft.CommandFramework.Models;
 using Aiursoft.NiBot.Dedup.Models;
 using CoenM.ImageHash.HashAlgorithms;
 using Microsoft.Extensions.Logging;
