@@ -10,6 +10,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Aiursoft.NiBot.Core\Aiursoft.NiBot.Core.csproj" />
+    <PackageReference Include="Aiursoft.Canon" Version="8.0.4" />
+    <PackageReference Include="Aiursoft.CommandFramework" Version="8.0.2" />
+    <PackageReference Include="CoenM.ImageSharp.ImageHash" Version="1.3.6" />
   </ItemGroup>
 </Project>

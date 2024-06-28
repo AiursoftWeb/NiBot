@@ -9,9 +9,8 @@ public delegate DistType CalculateDistance<in T>(T item1, T item2);
 public sealed class VpTree<T>
 {
     private T[] _items;
-    private DistType _tau;
     private Node? _root;
-    private Random _rand; // Used in BuildFromPoints
+    private readonly Random _rand; // Used in BuildFromPoints
     private CalculateDistance<T> _calculateDistance;
 
     public VpTree(T[] items, CalculateDistance<T> distanceCalculator)
@@ -20,7 +19,7 @@ public sealed class VpTree<T>
         Create(items, distanceCalculator);
     }
 
-    public void Create(T[] newItems, CalculateDistance<T> distanceCalculator)
+    private void Create(T[] newItems, CalculateDistance<T> distanceCalculator)
     {
         _items = newItems;
         _calculateDistance = distanceCalculator;
@@ -34,29 +33,6 @@ public sealed class VpTree<T>
         return result.Select(t => (_items[t.Index], t.Dist)).ToList();
     }
 
-    public List<(T, DistType)> Search(T target, int numberOfResults)
-    {
-        var closestHits = new List<HeapItem>();
-
-        // Reset tau to longest possible distance
-        _tau = DistType.MaxValue;
-
-        // Start search
-        Search(_root, target, numberOfResults, closestHits);
-
-        // Temp arrays for return values
-        List<(T, DistType)> returnResults = new();
-
-        // We have to reverse the order since we want the nearest object to be first in the array
-        for (var i = numberOfResults - 1; i > -1; i--)
-        {
-            returnResults.Add((_items[closestHits[i].Index], closestHits[i].Dist));
-        }
-
-        return returnResults;
-    }
-
-
     private sealed class Node // This cannot be struct because Node referring to Node causes error CS0523
     {
         public int Index;
@@ -65,16 +41,10 @@ public sealed class VpTree<T>
         public Node? Right;
     }
 
-    private sealed class HeapItem
+    private sealed class HeapItem(int index, DistType dist)
     {
-        public readonly int Index;
-        public readonly DistType Dist;
-
-        public HeapItem(int index, DistType dist)
-        {
-            Index = index;
-            Dist = dist;
-        }
+        public readonly int Index = index;
+        public readonly DistType Dist = dist;
 
         public static bool operator <(HeapItem h1, HeapItem h2)
         {
@@ -94,8 +64,10 @@ public sealed class VpTree<T>
             return null;
         }
 
-        var node = new Node();
-        node.Index = lowerIndex;
+        var node = new Node
+        {
+            Index = lowerIndex
+        };
 
         if (upperIndex - lowerIndex > 1)
         {
@@ -116,67 +88,7 @@ public sealed class VpTree<T>
         return node;
     }
 
-    private void Search(Node? node, T target, int numberOfResults, List<HeapItem> closestHits)
-    {
-        if (node == null)
-        {
-            return;
-        }
-
-        var dist = _calculateDistance(_items[node.Index], target);
-
-        // We found entry with shorter distance
-        if (dist < _tau)
-        {
-            if (closestHits.Count == numberOfResults)
-            {
-                // Too many results, remove the first one which has the longest distance
-                closestHits.RemoveAt(0);
-            }
-
-            // Add new hit
-            closestHits.Add(new HeapItem(node.Index, dist));
-
-            // Reorder if we have numberOfResults, and set new tau
-            if (closestHits.Count == numberOfResults)
-            {
-                closestHits.Sort((a, b) => Comparer<DistType>.Default.Compare(b.Dist, a.Dist));
-                _tau = closestHits[0].Dist;
-            }
-        }
-
-        if (node.Left == null && node.Right == null)
-        {
-            return;
-        }
-
-        if (dist < node.Threshold)
-        {
-            if (dist - _tau <= node.Threshold)
-            {
-                Search(node.Left, target, numberOfResults, closestHits);
-            }
-
-            if (dist + _tau >= node.Threshold)
-            {
-                Search(node.Right, target, numberOfResults, closestHits);
-            }
-        }
-        else
-        {
-            if (dist + _tau >= node.Threshold)
-            {
-                Search(node.Right, target, numberOfResults, closestHits);
-            }
-
-            if (dist - _tau <= node.Threshold)
-            {
-                Search(node.Left, target, numberOfResults, closestHits);
-            }
-        }
-    }
-
-    private void SearchByMaxd(Node? node, T target, int maxd, List<HeapItem> closestHits)
+    private void SearchByMaxd(Node? node, T target, DistType maxd, List<HeapItem> closestHits)
     {
         if (node == null)
         {

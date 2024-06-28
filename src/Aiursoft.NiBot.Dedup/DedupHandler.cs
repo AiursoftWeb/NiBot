@@ -91,8 +91,8 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
             .Build()
             .Services;
         
-        var calendar = services.GetRequiredService<DedupEngine>();
-        await calendar.DedupAsync(
+        var dedupEngine = services.GetRequiredService<DedupEngine>();
+        await dedupEngine.DedupAsync(
             path: path,
             similarityBar: similarityBar,
             recursive: recursive,

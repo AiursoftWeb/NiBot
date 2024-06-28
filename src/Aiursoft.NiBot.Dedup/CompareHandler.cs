@@ -16,7 +16,7 @@ public class CompareHandler : ExecutableCommandHandlerBuilder
     
     private static readonly Option<string[]> PathsOptions = new(
         ["--images", "-i"],
-        "Paths of the images to compare.")
+        "Paths of the images to compare. You can pass this '-i' parameter multiple times to compare at least two images.")
     {
         IsRequired = true
     };
@@ -38,23 +38,34 @@ public class CompareHandler : ExecutableCommandHandlerBuilder
         {
             throw new ArgumentException("At least two images should be provided for comparison.");
         }
+        
         var services = ServiceBuilder
             .CreateCommandHostBuilder<Startup>(verbose)
             .Build()
             .Services;
+        
         var imageHasher = services.GetRequiredService<ImageHasher>();
 
-        var mappedImages = await imageHasher.MapImagesAsync(paths, showProgress: !verbose, Environment.ProcessorCount);
+        var physicalPaths = paths
+            .Select(Path.GetFullPath)
+            .Where(File.Exists)
+            .ToArray();
+        var mappedImages = await imageHasher.MapImagesAsync(physicalPaths, showProgress: !verbose, Environment.ProcessorCount);
 
-        foreach (var mappedImage in mappedImages)
+        if (verbose)
         {
-            Console.WriteLine($"Image: {mappedImage.PhysicalPath}");
-            Console.WriteLine($"\t\tHash: \t{mappedImage.Hash}");
-            Console.WriteLine($"\t\tSize: \t{mappedImage.Size}");
-            Console.WriteLine($"\t\tResolution: \t{mappedImage.Resolution}");
-            Console.WriteLine($"\t\tIsGrayscale: \t{mappedImage.IsGrayscale}");
+            foreach (var mappedImage in mappedImages)
+            {
+                Console.WriteLine($"Image: {mappedImage.PhysicalPath}");
+                
+                // Display hash as hex.
+                Console.WriteLine($"\tHash: \t\t{mappedImage.Hash:X}");
+                Console.WriteLine($"\tSize: \t\t{mappedImage.Size}");
+                Console.WriteLine($"\tResolution: \t{mappedImage.Resolution}");
+                Console.WriteLine($"\tIsGrayscale: \t{mappedImage.IsGrayscale}");
+            }
         }
-        
+
         for (int i = 0; i < paths.Length; i++)
         {
             for (int j = i + 1; j < paths.Length; j++)

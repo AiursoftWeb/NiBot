@@ -9,8 +9,8 @@ public class Startup : IStartUp
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddScoped<DedupEngine>();
-        services.AddScoped<ImageHasher>();
+        services.AddTransient<DedupEngine>();
+        services.AddTransient<ImageHasher>();
         services.AddTaskCanon();
     }
 }
