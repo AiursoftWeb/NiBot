@@ -32,18 +32,19 @@ Description:
   De-duplicate images in a folder.
 
 Usage:
-  NiBot dedup [options]
+  nibot dedup [options]
 
 Options:
   -p, --path <path> (REQUIRED)                  Path of the folder to dedup.
-  -ds, --duplicate-similar <duplicate-similar>  Similarity bar. Default is [96]. This value means two image are considered as duplicates if their similarity is greater than it. Setting too small may cause different images
-                                                to be considered as duplicates. Suggested values: [96-100] [default: 96]
-  -r, --recursive                               Recursively search for similar images in subdirectories. Default is [false]. [default: False]
-  -k, --keep <keep>                             Preference for sorting images by quality to determine which to keep when duplicates are found. Default is [Colorful,HighestResolution,Largest,Newest]. Available options:
-                                                Newest, Oldest, Smallest, Largest, HighestResolution, LowestResolution. [default: Colorful|HighestResolution|Largest|Newest]
-  -a, --action <Delete|MoveToTrash|Nothing>     Action to take when duplicates are found. Default is [Nothing]. Available options: Nothing, Delete, MoveToTrash, MoveAndCopyOriginalToTrash. [default: Nothing]
-  -i, --interactive                             Interactive mode. Ask for confirmation before deleting files. Default is [false]. [default: False]
-  -e, --extensions <extensions>                 Extensions of files to dedup. Default is [jpg,jpeg,png,jfif]. [default: jpg|jpeg|png|jfif]
+  -ds, --duplicate-similar <duplicate-similar>  Similarity bar. This value means two image are considered as duplicates if their similarity is greater than it. Setting too small may cause different images to be considered as 
+                                                duplicates. Suggested values: [96-100] [default: 96]
+  -r, --recursive                               Recursively search for similar images in subdirectories. [default: False]
+  -k, --keep <keep>                             Preference for sorting images by quality to determine which to keep when duplicates are found. Available options: 
+                                                Colorful|GrayScale|Newest|Oldest|Smallest|Largest|HighestResolution|LowestResolution. [default: Colorful|HighestResolution|Largest|Newest]
+  -a, --action <Delete|MoveToTrash|Nothing>     Action to take when duplicates are found. Available options: Nothing, Delete, MoveToTrash. [default: MoveToTrash]
+  -y, --yes                                     No interactive mode. Taking action without asking for confirmation. [default: False]
+  -e, --extensions <extensions>                 Extensions of files to dedup. [default: jpg|jpeg|png|jfif]
+  -t, --threads <threads>                       Number of threads to use for image indexing. Default is 32. [default: 32]
   -v, --verbose                                 Show detailed log
   -?, -h, --help                                Show help and usage information
 ```
