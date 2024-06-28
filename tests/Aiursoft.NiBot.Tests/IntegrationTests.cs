@@ -64,7 +64,7 @@ public class IntegrationTests
     public async Task InvokeCompare()
     {
         var image1 = Path.Combine(_tempAssetsFolder, "mc","p1.png");
-        var image2 = Path.Combine(_tempAssetsFolder, "mc","p2.png");
+        var image2 = Path.Combine(_tempAssetsFolder, "mc","p2.png"); // P2 quality is better. P1 and P2 similarity is 96.88%
         var result = await _program.TestRunAsync(["compare", "-i", image1, "-i", image2, "-v"]);
         Assert.AreEqual(0, result.ProgramReturn);
     }
@@ -73,7 +73,7 @@ public class IntegrationTests
     public async Task InvokeDedup()
     {
         var dedupPath = Path.Combine(_tempAssetsFolder, "mc");
-        var result = await _program.TestRunAsync(["dedup", "--path", dedupPath, "--yes", "--duplicate-similar", "90"]);
+        var result = await _program.TestRunAsync(["dedup", "--path", dedupPath, "--yes", "--duplicate-similar", "90"]); // P2 quality is better. P1 and P2 similarity is 96.88%
         
         Assert.AreEqual(0, result.ProgramReturn);
         var resultFiles = Directory.GetFiles(dedupPath, "*", SearchOption.TopDirectoryOnly);
@@ -110,7 +110,7 @@ public class IntegrationTests
     public async Task InvokeDedupStrict()
     {
         var dedupPath = Path.Combine(_tempAssetsFolder, "mc");
-        var result = await _program.TestRunAsync(["dedup", "--path", dedupPath, "--yes", "--duplicate-similar", "99"]);
+        var result = await _program.TestRunAsync(["dedup", "--path", dedupPath, "--yes", "--duplicate-similar", "99"]); // P2 quality is better. P1 and P2 similarity is 96.88%
         
         Assert.AreEqual(0, result.ProgramReturn);
         var resultFiles = Directory.GetFiles(dedupPath, "*", SearchOption.TopDirectoryOnly);
