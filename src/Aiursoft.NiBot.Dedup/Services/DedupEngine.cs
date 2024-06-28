@@ -83,7 +83,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                 {
                     logger.LogInformation(
                         "Grayscale {grayscale}. Resolution {resolution}. Size {size}. File name {fileName} is previewing as duplicate photo with similarity {similarity}. Press ENTER to do {action}.",
-                        photo.IsGrayscale, photo.Resolution, photo.Size, photo.PhysicalPath, photo.ImageDiffRatio(bestPhoto) * 100 + "%",
+                        photo.IsGrayscale, photo.Resolution, photo.Size, photo.PhysicalPath, photo.ImageSimilarityRatio(bestPhoto) * 100 + "%",
                         action);
                     PreviewImage(photo.PhysicalPath);
                     Console.ReadLine();
