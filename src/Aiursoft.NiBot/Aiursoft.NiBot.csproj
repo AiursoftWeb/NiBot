@@ -30,7 +30,6 @@
   </PropertyGroup>
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="." />
-    <ProjectReference Include="..\Aiursoft.NiBot.Calendar\Aiursoft.NiBot.Calendar.csproj" />
     <ProjectReference Include="..\Aiursoft.NiBot.Dedup\Aiursoft.NiBot.Dedup.csproj" />
   </ItemGroup>
 </Project>

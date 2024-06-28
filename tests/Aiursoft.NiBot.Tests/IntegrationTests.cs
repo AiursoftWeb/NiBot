@@ -1,6 +1,6 @@
 ﻿using Aiursoft.CommandFramework;
 using Aiursoft.CommandFramework.Models;
-using Aiursoft.NiBot.Calendar;
+using Aiursoft.NiBot.Dedup;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Aiursoft.NiBot.Tests;
@@ -11,7 +11,8 @@ public class IntegrationTests
     private readonly NestedCommandApp _program = new NestedCommandApp()
         .WithGlobalOptions(CommonOptionsProvider.DryRunOption)
         .WithGlobalOptions(CommonOptionsProvider.VerboseOption)
-        .WithFeature(new CalendarHandler());
+        .WithFeature(new DedupHandler())
+        .WithFeature(new CompareHandler());
 
     [TestMethod]
     public async Task InvokeHelp()
