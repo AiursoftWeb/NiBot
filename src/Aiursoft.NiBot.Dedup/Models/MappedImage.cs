@@ -29,6 +29,7 @@ public class MappedImage
         {
             throw new FileNotFoundException("File not found", physicalPath);
         }
+        
         Size = file.Length;
         Resolution = resolution;
         

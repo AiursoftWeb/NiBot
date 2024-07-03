@@ -16,7 +16,7 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
 
     private static readonly Option<string> PathOptions = new(
         ["--path", "-p"],
-        "Path of the folder to dedup.")
+        "Path of the folder to de-duplicate. (Symbolic links will be ignored)")
     {
         IsRequired = true
     };
@@ -29,7 +29,7 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
     private static readonly Option<bool> RecursiveOption = new(
         ["--recursive", "-r"],
         () => false,
-        "Recursively search for similar images in subdirectories.");
+        "Recursively search for similar images in subdirectories. (.trash content will be ignored)");
 
     private static readonly Option<KeepPreference[]> KeepOption = new(
         ["--keep", "-k"],

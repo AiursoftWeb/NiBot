@@ -41,7 +41,9 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
             "Start de-duplicating images in {path}. Minimum similarity bar is {similarityBar}. Recursive: {recursive}. Keep: {keepPreferences}. Action: {action}. Interactive: {interactive}. Extensions: {extensions}.",
             path, similarityBar, recursive, keepPreferences, action, interactive, string.Join(", ", extensions));
         var files = Directory.GetFiles(path, "*.*",
-            recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+                recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+            .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false) // Ignore .trash folder.
+            .Where(f => !new FileInfo(f).Attributes.HasFlag(FileAttributes.ReparsePoint)); // Ignore symbolic links.
         var images = files
             .Where(file => extensions.Any(ext =>
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
