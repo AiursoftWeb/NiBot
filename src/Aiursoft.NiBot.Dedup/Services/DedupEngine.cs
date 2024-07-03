@@ -105,12 +105,12 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                         break;
                     case DuplicateAction.MoveToTrashAndCreateLink:
                         await MoveToTrashAsync(photo, path, bestPhoto.PhysicalPath);
-                        CreateLink(path, bestPhoto.PhysicalPath, photo.PhysicalPath);
+                        CreateLink(bestPhoto.PhysicalPath, photo.PhysicalPath);
                         break;
                     case DuplicateAction.DeleteAndCreateLink:
                         File.Delete(photo.PhysicalPath);
                         logger.LogInformation("Deleted {path}.", photo.PhysicalPath);
-                        CreateLink(path, bestPhoto.PhysicalPath, photo.PhysicalPath);
+                        CreateLink(bestPhoto.PhysicalPath, photo.PhysicalPath);
                         logger.LogInformation("Deleted {path} and created a link.", photo.PhysicalPath);
                         break;
                     default:
@@ -120,19 +120,29 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         }
     }
     
-    private void CreateLink(string workingPath, string actualFile, string virtualFile)
+    private void CreateLink(string actualFile, string virtualFile)
     {
-        var actualFileAbsolutePath = Path.Combine(workingPath, actualFile);
-        var virtualFileAbsolutePath = Path.Combine(workingPath, virtualFile);
-        File.CreateSymbolicLink(virtualFileAbsolutePath, actualFileAbsolutePath);
+        var virtualFilePathWithoutFileName = Path.GetDirectoryName(virtualFile)!;
+        var relativeActualFile = Path.GetRelativePath(virtualFilePathWithoutFileName, actualFile);
+        File.CreateSymbolicLink(virtualFile, relativeActualFile);
         
-        if (File.Exists(virtualFileAbsolutePath))
+        if (File.Exists(virtualFile) 
+            && new FileInfo(virtualFile).Attributes.HasFlag(FileAttributes.ReparsePoint)
+            && new FileInfo(virtualFile).ResolveLinkTarget(true)?.FullName == actualFile)
         {
             logger.LogInformation("Created a link from {virtualFile} to {actualFile}.", virtualFile, actualFile);
         }
         else
         {
-            var message = $"Failed to create a link from {virtualFile} to {actualFile}.";
+            var message = $"Failed to create a link from {virtualFile} to {actualFile}. " +
+                          $"Detailed information: " +
+                          $"Virtual File: {virtualFile}, " +
+                          $"Actual File: {actualFile}, " +
+                          $"Relative Actual File: {relativeActualFile}." +
+                          $"Virtual File Exists: {File.Exists(virtualFile)}, " +
+                          $"Virtual File Size: {new FileInfo(virtualFile).Length}, " +
+                          $"Virtual File is a link: {new FileInfo(virtualFile).Attributes.HasFlag(FileAttributes.ReparsePoint)}, " +
+                          $"Virtual File Target: {new FileInfo(virtualFile).ResolveLinkTarget(true)?.FullName}.";
             logger.LogError(message);
             throw new Exception(message);
         }
