@@ -103,10 +103,36 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                         logger.LogWarning(
                             "No action taken. If you want to delete or move the duplicate photos, please specify the action with --action.");
                         break;
+                    case DuplicateAction.MoveToTrashAndCreateLink:
+                        await MoveToTrashAsync(photo, path, bestPhoto.PhysicalPath);
+                        CreateLink(bestPhoto.PhysicalPath, photo.PhysicalPath);
+                        logger.LogInformation("Moved {path} to .trash folder and created a link.", photo.PhysicalPath);
+                        break;
+                    case DuplicateAction.DeleteAndCreateLink:
+                        File.Delete(photo.PhysicalPath);
+                        CreateLink(bestPhoto.PhysicalPath, photo.PhysicalPath);
+                        logger.LogInformation("Deleted {path} and created a link.", photo.PhysicalPath);
+                        break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), action, null);
                 }
             }
+        }
+    }
+    
+    private void CreateLink(string actualFile, string virtualFile)
+    {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            Process.Start("cmd.exe", $"/c mklink \"{virtualFile}\" \"{actualFile}\"");
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            Process.Start("ln", $"-s \"{actualFile}\" \"{virtualFile}\"");
+        }
+        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            Process.Start("ln", $"-s \"{actualFile}\" \"{virtualFile}\"");
         }
     }
 

@@ -4,5 +4,7 @@ public enum DuplicateAction
 {
     Nothing,
     Delete,
-    MoveToTrash
+    MoveToTrash,
+    MoveToTrashAndCreateLink,
+    DeleteAndCreateLink
 }

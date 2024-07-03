@@ -85,7 +85,7 @@ public class IntegrationTests
         var trashFolder = Path.Combine(dedupPath, ".trash");
         Assert.IsTrue(Directory.Exists(trashFolder));
         
-        // .trash contains the deleted file.
+        // .trash contains the soft-deleted file.
         var trashFiles = Directory.GetFiles(trashFolder, "*", SearchOption.TopDirectoryOnly);
         
         // Two files in trash.
@@ -121,6 +121,46 @@ public class IntegrationTests
         // .trash not exists.
         var trashFolder = Path.Combine(dedupPath, ".trash");
         Assert.IsFalse(Directory.Exists(trashFolder));
+    }
+    
+    [TestMethod]
+    public async Task InvokeDedupCreateLink()
+    {
+        var dedupPath = Path.Combine(_tempAssetsFolder, "mc");
+        var result = await _program.TestRunAsync(["dedup", "--path", dedupPath, "--yes", "--duplicate-similar", "90", "--action", "MoveToTrashAndCreateLink"]); // P2 quality is better. P1 and P2 similarity is 96.88%
+        
+        Assert.AreEqual(0, result.ProgramReturn);
+        var resultFiles = Directory.GetFiles(dedupPath, "*", SearchOption.TopDirectoryOnly);
+        
+        // Two files left
+        Assert.AreEqual(2, resultFiles.Length);
+        
+        // File p1 is actually a link.
+        Assert.IsTrue(File.GetAttributes(resultFiles.First()).HasFlag(FileAttributes.ReparsePoint));
+        Assert.IsFalse(File.GetAttributes(resultFiles.Last()).HasFlag(FileAttributes.ReparsePoint));
+        
+        // .trash exists.
+        var trashFolder = Path.Combine(dedupPath, ".trash");
+        Assert.IsTrue(Directory.Exists(trashFolder));
+        
+        // .trash contains the soft-deleted file.
+        var trashFiles = Directory.GetFiles(trashFolder, "*", SearchOption.TopDirectoryOnly);
+        
+        // Two files in trash.
+        Assert.AreEqual(2, trashFiles.Length);
+        
+        // p1.png in trash.
+        Assert.AreEqual(Path.Combine(trashFolder, "p1.png"), trashFiles.First(t => t.Contains("png")));
+        
+        // .duplicateReasons.txt exists.
+        var duplicateReasonsFile = Path.Combine(trashFolder, ".duplicateReasons.txt");
+        Assert.IsTrue(File.Exists(duplicateReasonsFile));
+        
+        // .duplicateReasons.txt contains the reason.
+        var duplicateReasons = await File.ReadAllTextAsync(duplicateReasonsFile);
+        Assert.IsTrue(duplicateReasons.Contains("p1.png is moved here as")); //The file p1.png is moved here as .trash\p1.png because it's a duplicate of p2.png.
+        Assert.IsTrue(duplicateReasons.Contains("because it's a duplicate of"));
+        Assert.IsTrue(duplicateReasons.Contains("p2.png"));
     }
 }
 
