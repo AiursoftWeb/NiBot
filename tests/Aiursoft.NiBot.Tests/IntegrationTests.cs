@@ -22,13 +22,14 @@ public class IntegrationTests
     {
         _tempAssetsFolder = Path.Combine(Path.GetTempPath(), $"NiBot-UT-{Guid.NewGuid()}");
         _imageAssets.CopyFilesRecursively(_tempAssetsFolder);
-        Console.WriteLine($"Temp folder: {_tempAssetsFolder}");
+        Console.WriteLine($"Temp folder: {_tempAssetsFolder} was filled with assets from {_imageAssets}");
     }
     
     [TestCleanup]
     public void Cleanup()
     {
         FolderDeleter.DeleteByForce(_tempAssetsFolder);
+        Console.WriteLine($"Temp folder deleted: {_tempAssetsFolder}");
     }
 
     [TestMethod]
