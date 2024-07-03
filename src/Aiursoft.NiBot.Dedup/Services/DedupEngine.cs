@@ -105,12 +105,12 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                         break;
                     case DuplicateAction.MoveToTrashAndCreateLink:
                         await MoveToTrashAsync(photo, path, bestPhoto.PhysicalPath);
-                        CreateLink(bestPhoto.PhysicalPath, photo.PhysicalPath);
+                        CreateLink(path, bestPhoto.PhysicalPath, photo.PhysicalPath);
                         break;
                     case DuplicateAction.DeleteAndCreateLink:
                         File.Delete(photo.PhysicalPath);
                         logger.LogInformation("Deleted {path}.", photo.PhysicalPath);
-                        CreateLink(bestPhoto.PhysicalPath, photo.PhysicalPath);
+                        CreateLink(path, bestPhoto.PhysicalPath, photo.PhysicalPath);
                         logger.LogInformation("Deleted {path} and created a link.", photo.PhysicalPath);
                         break;
                     default:
@@ -120,11 +120,13 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         }
     }
     
-    private void CreateLink(string actualFile, string virtualFile)
+    private void CreateLink(string workingPath, string actualFile, string virtualFile)
     {
-        File.CreateSymbolicLink(virtualFile, actualFile);
+        var actualFileAbsolutePath = Path.Combine(workingPath, actualFile);
+        var virtualFileAbsolutePath = Path.Combine(workingPath, virtualFile);
+        File.CreateSymbolicLink(virtualFileAbsolutePath, actualFileAbsolutePath);
         
-        if (File.Exists(virtualFile))
+        if (File.Exists(virtualFileAbsolutePath))
         {
             logger.LogInformation("Created a link from {virtualFile} to {actualFile}.", virtualFile, actualFile);
         }

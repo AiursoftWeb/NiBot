@@ -142,6 +142,10 @@ public class IntegrationTests
         Assert.IsTrue(File.GetAttributes(resultFiles.First()).HasFlag(FileAttributes.ReparsePoint));
         Assert.IsFalse(File.GetAttributes(resultFiles.Last()).HasFlag(FileAttributes.ReparsePoint));
         
+        // File p1 point to p2.
+        var linkTarget = new FileInfo(resultFiles.First()).ResolveLinkTarget(true);
+        Assert.AreEqual(resultFiles.Last(), linkTarget?.FullName);
+        
         // .trash exists.
         var trashFolder = Path.Combine(dedupPath, ".trash");
         Assert.IsTrue(Directory.Exists(trashFolder));
