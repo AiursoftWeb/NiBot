@@ -66,7 +66,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                     current.ThenByDescending(ConvertKeepPreferenceToExpression.Convert(keepPreference)));
             var bestPhoto = query.First();
 
-            logger.LogInformation("Found {Count} duplicates pictures with image {Best}", group.Length,
+            logger.LogInformation("Found {Count} duplicates pictures with image {Best}", group.Length - 1,
                 bestPhoto.PhysicalPath);
 
             if (interactive)
@@ -99,22 +99,17 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                         break;
                     case DuplicateAction.MoveToTrash:
                         await MoveToTrashAsync(photo, path, bestPhoto.PhysicalPath);
-                        logger.LogInformation("Moved {path} to .trash folder.", photo.PhysicalPath);
                         break;
                     case DuplicateAction.Nothing:
-                        logger.LogWarning(
-                            "No action taken. If you want to delete or move the duplicate photos, please specify the action with --action.");
+                        logger.LogWarning("No action taken. If you want to delete or move the duplicate photos, please specify the action with --action.");
                         break;
                     case DuplicateAction.MoveToTrashAndCreateLink:
                         await MoveToTrashAsync(photo, path, bestPhoto.PhysicalPath);
                         CreateLink(bestPhoto.PhysicalPath, photo.PhysicalPath);
-                        logger.LogInformation("Moved {path} to .trash folder and created a link.", photo.PhysicalPath);
-                        
-                        var filesInPath = Directory.GetFiles(path, "*.*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
-                        logger.LogInformation("Found {Count} images in {path}.", filesInPath.Length, path);
                         break;
                     case DuplicateAction.DeleteAndCreateLink:
                         File.Delete(photo.PhysicalPath);
+                        logger.LogInformation("Deleted {path}.", photo.PhysicalPath);
                         CreateLink(bestPhoto.PhysicalPath, photo.PhysicalPath);
                         logger.LogInformation("Deleted {path} and created a link.", photo.PhysicalPath);
                         break;
@@ -131,11 +126,11 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         
         if (File.Exists(virtualFile))
         {
-            logger.LogInformation("Created a link from {actualFile} to {virtualFile}.", actualFile, virtualFile);
+            logger.LogInformation("Created a link from {virtualFile} to {actualFile}.", virtualFile, actualFile);
         }
         else
         {
-            var message = $"Failed to create a link from {actualFile} to {virtualFile}.";
+            var message = $"Failed to create a link from {virtualFile} to {actualFile}.";
             logger.LogError(message);
             throw new Exception(message);
         }
@@ -160,6 +155,8 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
             $"The file {photo.PhysicalPath} is moved here as {trashPath} because it's a duplicate of {duplicateSourceFile}.";
         var messageFile = Path.Combine(trashFolder, $".duplicateReasons.txt");
         await File.AppendAllTextAsync(messageFile, message + Environment.NewLine);
+        
+        logger.LogInformation("Moved {path} to .trash folder.", photo.PhysicalPath);
     }
 
     private IEnumerable<MappedImage[]> BuildImageGroups(MappedImage[] mappedImages, int similarityBar)
