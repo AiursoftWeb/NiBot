@@ -10,7 +10,7 @@ namespace Aiursoft.NiBot.Tests;
 public class IntegrationTests
 {
     private readonly string _imageAssets = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "assets");
-    private readonly string _tempAssetsFolder = Path.Combine(Path.GetTempPath(), $"NiBot-UT-{Guid.NewGuid()}");
+    private string _tempAssetsFolder = Path.Combine(Path.GetTempPath(), $"NiBot-UT-{Guid.NewGuid()}");
     private readonly NestedCommandApp _program = new NestedCommandApp()
         .WithGlobalOptions(CommonOptionsProvider.DryRunOption)
         .WithGlobalOptions(CommonOptionsProvider.VerboseOption)
@@ -20,7 +20,9 @@ public class IntegrationTests
     [TestInitialize]
     public void Initialize()
     {
+        _tempAssetsFolder = Path.Combine(Path.GetTempPath(), $"NiBot-UT-{Guid.NewGuid()}");
         _imageAssets.CopyFilesRecursively(_tempAssetsFolder);
+        Console.WriteLine($"Temp folder: {_tempAssetsFolder}");
     }
     
     [TestCleanup]
@@ -133,7 +135,7 @@ public class IntegrationTests
         var resultFiles = Directory.GetFiles(dedupPath, "*", SearchOption.TopDirectoryOnly);
         
         // Two files left
-        Assert.AreEqual(2, resultFiles.Length);
+        Assert.AreEqual(2, resultFiles.Length, $"The folder {dedupPath} should contain 2 files.");
         
         // File p1 is actually a link.
         Assert.IsTrue(File.GetAttributes(resultFiles.First()).HasFlag(FileAttributes.ReparsePoint));

@@ -107,6 +107,9 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                         await MoveToTrashAsync(photo, path, bestPhoto.PhysicalPath);
                         CreateLink(bestPhoto.PhysicalPath, photo.PhysicalPath);
                         logger.LogInformation("Moved {path} to .trash folder and created a link.", photo.PhysicalPath);
+                        
+                        var filesInPath = Directory.GetFiles(path, "*.*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+                        logger.LogInformation("Found {Count} images in {path}.", filesInPath.Length, path);
                         break;
                     case DuplicateAction.DeleteAndCreateLink:
                         File.Delete(photo.PhysicalPath);
@@ -122,17 +125,17 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
     
     private void CreateLink(string actualFile, string virtualFile)
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        File.CreateSymbolicLink(virtualFile, actualFile);
+        
+        if (File.Exists(virtualFile))
         {
-            Process.Start("cmd.exe", $"/c mklink \"{virtualFile}\" \"{actualFile}\"");
+            logger.LogInformation("Created a link from {actualFile} to {virtualFile}.", actualFile, virtualFile);
         }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        else
         {
-            Process.Start("ln", $"-s \"{actualFile}\" \"{virtualFile}\"");
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            Process.Start("ln", $"-s \"{actualFile}\" \"{virtualFile}\"");
+            var message = $"Failed to create a link from {actualFile} to {virtualFile}.";
+            logger.LogError(message);
+            throw new Exception(message);
         }
     }
 
