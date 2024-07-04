@@ -92,8 +92,12 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
             .Services;
         
         var dedupEngine = services.GetRequiredService<DedupEngine>();
+
+        var absolutePath = Path.IsPathRooted(path)
+            ? Path.GetFullPath(path)
+            : Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, path));
         await dedupEngine.DedupAsync(
-            path: path,
+            path: absolutePath,
             similarityBar: similarityBar,
             recursive: recursive,
             keepPreferences: keep,
