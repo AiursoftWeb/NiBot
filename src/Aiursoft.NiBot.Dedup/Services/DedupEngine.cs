@@ -37,9 +37,17 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         string[] extensions,
         bool verbose, int threads)
     {
-        logger.LogTrace(
-            "Start de-duplicating images in {path}. Minimum similarity bar is {similarityBar}. Recursive: {recursive}. Keep: {keepPreferences}. Action: {action}. Interactive: {interactive}. Extensions: {extensions}.",
-            path, similarityBar, recursive, keepPreferences, action, interactive, string.Join(", ", extensions));
+        if (verbose)
+        {
+            logger.LogInformation(
+                "Start de-duplicating images in {path}. Minimum similarity bar is {similarityBar}. Recursive: {recursive}. Keep: {keepPreferences}. Action: {action}. Interactive: {interactive}. Extensions: {extensions}.",
+                path, similarityBar, recursive, keepPreferences, action, interactive, string.Join(", ", extensions));
+        }
+        else
+        {
+            logger.LogInformation("Start de-duplicating images in {path}. ", path);
+        }
+
         var files = Directory.GetFiles(path, "*.*",
                 recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
             .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false) // Ignore .trash folder.
@@ -85,7 +93,8 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                 {
                     logger.LogInformation(
                         "Grayscale {grayscale}. Resolution {resolution}. Size {size}. File name {fileName} is previewing as duplicate photo with similarity {similarity}. Press ENTER to do {action}.",
-                        photo.IsGrayscale, photo.Resolution, photo.Size, photo.PhysicalPath, photo.ImageSimilarityRatio(bestPhoto) * 100 + "%",
+                        photo.IsGrayscale, photo.Resolution, photo.Size, photo.PhysicalPath,
+                        photo.ImageSimilarityRatio(bestPhoto) * 100 + "%",
                         action);
                     PreviewImage(photo.PhysicalPath);
                     Console.ReadLine();
@@ -101,7 +110,8 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                         await MoveToTrashAsync(photo, path, bestPhoto.PhysicalPath);
                         break;
                     case DuplicateAction.Nothing:
-                        logger.LogWarning("No action taken. If you want to delete or move the duplicate photos, please specify the action with --action.");
+                        logger.LogWarning(
+                            "No action taken. If you want to delete or move the duplicate photos, please specify the action with --action.");
                         break;
                     case DuplicateAction.MoveToTrashAndCreateLink:
                         await MoveToTrashAsync(photo, path, bestPhoto.PhysicalPath);
@@ -119,14 +129,14 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
             }
         }
     }
-    
+
     private void CreateLink(string actualFile, string virtualFile)
     {
         var virtualFilePathWithoutFileName = Path.GetDirectoryName(virtualFile)!;
         var relativeActualFile = Path.GetRelativePath(virtualFilePathWithoutFileName, actualFile);
         File.CreateSymbolicLink(virtualFile, relativeActualFile);
-        
-        if (File.Exists(virtualFile) 
+
+        if (File.Exists(virtualFile)
             && new FileInfo(virtualFile).Attributes.HasFlag(FileAttributes.ReparsePoint)
             && new FileInfo(virtualFile).ResolveLinkTarget(true)?.FullName == actualFile)
         {
@@ -167,7 +177,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
             $"The file {photo.PhysicalPath} is moved here as {trashPath} because it's a duplicate of {duplicateSourceFile}.";
         var messageFile = Path.Combine(trashFolder, $".duplicateReasons.txt");
         await File.AppendAllTextAsync(messageFile, message + Environment.NewLine);
-        
+
         logger.LogInformation("Moved {path} to .trash folder.", photo.PhysicalPath);
     }
 
