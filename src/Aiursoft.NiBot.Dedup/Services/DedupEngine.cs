@@ -67,13 +67,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
 
         foreach (var group in imageGroups)
         {
-            // TODO: Move this to a helper class for getting best photo.
-            var query = group.OrderByDescending(ConvertKeepPreferenceToExpression.Convert(keepPreferences.First()));
-            query = keepPreferences.Skip(1).Aggregate(query,
-                (current, keepPreference) =>
-                    current.ThenByDescending(ConvertKeepPreferenceToExpression.Convert(keepPreference)));
-            var bestPhoto = query.First();
-
+            var bestPhoto = FindBestPhoto(group, keepPreferences);
             logger.LogInformation("Found {Count} duplicates pictures with image {Best}", group.Length - 1,
                 bestPhoto.PhysicalPath);
 
@@ -151,6 +145,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
             logger.LogInformation("Start copying without duplicate images in {sourceFolder}.", sourceFolder);
         }
 
+        // TODO: Add a new UT to test the feature of the recursive option.
         var sourceFiles = Directory.GetFiles(sourceFolder, "*.*",
                 recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
             .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false); // Ignore .trash folder.
@@ -187,13 +182,8 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         var skippedImagesCount = 0;
         foreach (var group in imageGroups)
         {
-            // TODO: Move this to a helper class for getting best photo.
-            var query = group.OrderByDescending(ConvertKeepPreferenceToExpression.Convert(keepPreferences.First()));
-            query = keepPreferences.Skip(1).Aggregate(query,
-                (current, keepPreference) =>
-                    current.ThenByDescending(ConvertKeepPreferenceToExpression.Convert(keepPreference)));
-            var bestPhoto = query.First();
-            
+            // TODO: Add a new UT to test the case that the best photo is valid.
+            var bestPhoto = FindBestPhoto(group, keepPreferences);
             var duplicate = destinationImageTree.SearchByMaxDist(bestPhoto, maxDistance).Select(t => t.Item1).FirstOrDefault();
             if (duplicate != null)
             {
@@ -208,9 +198,12 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                 var sourceFilePath = bestPhoto.PhysicalPath;
                 while (IsSymbolicLink(sourceFilePath!))
                 {
+                    // TODO: Add a new UT to test the case that the source file is a symbolic link.
                     sourceFilePath = new FileInfo(sourceFilePath!).ResolveLinkTarget(true)?.FullName;
                 }
                 
+                // TODO: Add a new UT to test the case that the destination file already exists.
+                // TODO: Add a new UT to test the case that the destination file is not under root of the destination folder.
                 var destinationPath = Path.Combine(destinationFolder, Path.GetRelativePath(sourceFolder, bestPhoto.PhysicalPath));
                 while (File.Exists(destinationPath))
                 {
@@ -333,5 +326,15 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         {
             logger.LogError(e, "Failed to open image {path}.", path);
         }
+    }
+    
+    private MappedImage FindBestPhoto(IEnumerable<MappedImage> group, KeepPreference[] keepPreferences)
+    {
+        var query = group.OrderByDescending(ConvertKeepPreferenceToExpression.Convert(keepPreferences.First()));
+        query = keepPreferences.Skip(1).Aggregate(query,
+            (current, keepPreference) =>
+                current.ThenByDescending(ConvertKeepPreferenceToExpression.Convert(keepPreference)));
+        var bestPhoto = query.First();
+        return bestPhoto;
     }
 }
