@@ -26,11 +26,11 @@ public sealed class VpTree<T>
         _root = BuildFromPoints(0, newItems.Length);
     }
 
-    public List<(T, DistType)> SearchByMaxDist(T query, int maxDist)
+    public IEnumerable<(T, DistType)> SearchByMaxDist(T query, int maxDist)
     {
-        List<HeapItem> result = new();
+        List<HeapItem> result = [];
         SearchByMaxd(_root, query, maxDist, result);
-        return result.Select(t => (_items[t.Index], t.Dist)).ToList();
+        return result.Select(t => (_items[t.Index], t.Dist));
     }
 
     private sealed class Node // This cannot be struct because Node referring to Node causes error CS0523
