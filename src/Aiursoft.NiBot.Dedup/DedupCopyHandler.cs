@@ -3,6 +3,7 @@ using System.CommandLine.Invocation;
 using Aiursoft.CommandFramework.Framework;
 using Aiursoft.CommandFramework.Models;
 using Aiursoft.CommandFramework.Services;
+using Aiursoft.NiBot.Dedup.Models;
 using Aiursoft.NiBot.Dedup.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,6 +37,11 @@ public class DedupCopyHandler : ExecutableCommandHandlerBuilder
         ["--recursive", "-r"],
         () => false,
         "Recursively search for similar images in subdirectories. (.trash content will be ignored)");
+    
+    private static readonly Option<KeepPreference[]> KeepOption = new(
+        ["--keep", "-k"],
+        () => [KeepPreference.Colorful, KeepPreference.HighestResolution, KeepPreference.Largest, KeepPreference.Newest],
+        "Preference for sorting images by quality to determine which to keep when duplicates are found. Available options: Colorful|GrayScale|Newest|Oldest|Smallest|Largest|HighestResolution|LowestResolution.");
 
     private static readonly Option<bool> YesOption = new(
         ["--yes", "-y"],
@@ -60,6 +66,7 @@ public class DedupCopyHandler : ExecutableCommandHandlerBuilder
             DestinationPathOptions,
             SimilarityBar,
             RecursiveOption,
+            KeepOption,
             YesOption,
             ExtensionsOption,
             ThreadsOption
@@ -73,10 +80,12 @@ public class DedupCopyHandler : ExecutableCommandHandlerBuilder
         var destinationPath = context.ParseResult.GetValueForOption(DestinationPathOptions)!;
         var similarityBar = context.ParseResult.GetValueForOption(SimilarityBar);
         var recursive = context.ParseResult.GetValueForOption(RecursiveOption);
+        var keep = context.ParseResult.GetValueForOption(KeepOption);
         var yes = context.ParseResult.GetValueForOption(YesOption);
         var extensions = context.ParseResult.GetValueForOption(ExtensionsOption);
         var threads = context.ParseResult.GetValueForOption(ThreadsOption);
         
+        if (!(keep?.Any() ?? false)) throw new ArgumentException("At least one preference should be provided for --keep.");
         if (!(extensions?.Any() ?? false)) throw new ArgumentException("At least one extension should be provided for --extensions.");
         
         var services = ServiceBuilder
@@ -97,6 +106,7 @@ public class DedupCopyHandler : ExecutableCommandHandlerBuilder
             destinationFolder: absoluteDestinationPath,
             similarityBar: similarityBar,
             recursive: recursive,
+            keepPreferences: keep,
             interactive: !yes,
             extensions: extensions,
             verbose: verbose,

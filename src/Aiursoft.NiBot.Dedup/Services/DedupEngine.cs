@@ -135,6 +135,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         string destinationFolder,
         int similarityBar,
         bool recursive,
+        KeepPreference[] keepPreferences,
         bool interactive,
         string[] extensions,
         bool verbose, int threads)
@@ -149,11 +150,10 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         {
             logger.LogInformation("Start copying without duplicate images in {sourceFolder}.", sourceFolder);
         }
-        
+
         var sourceFiles = Directory.GetFiles(sourceFolder, "*.*",
                 recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-            .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false) // Ignore .trash folder.
-            .Where(f => !new FileInfo(f).Attributes.HasFlag(FileAttributes.ReparsePoint)); // Ignore symbolic links.
+            .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false); // Ignore .trash folder.
         var sourceImages = sourceFiles
             .Where(file => extensions.Any(ext =>
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
@@ -161,11 +161,10 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         
         logger.LogInformation("Found {Count} images in {sourceFolder}. Calculating hashes...", sourceImages.Length, sourceFolder);
         var sourceMappedImages = await imageHasher.MapImagesAsync(sourceImages, showProgress: !verbose, threads: threads);
-        
+
         var destinationFiles = Directory.GetFiles(destinationFolder, "*.*",
                 recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
-            .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false) // Ignore .trash folder.
-            .Where(f => !new FileInfo(f).Attributes.HasFlag(FileAttributes.ReparsePoint)); // Ignore symbolic links.
+            .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false); // Ignore .trash folder.
         var destinationImages = destinationFiles
             .Where(file => extensions.Any(ext =>
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
@@ -174,30 +173,48 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         logger.LogInformation("Found {Count} images in {destinationFolder}. Calculating hashes...", destinationImages.Length, destinationFolder);
         var destinationMappedImages = await imageHasher.MapImagesAsync(destinationImages.ToArray(), showProgress: !verbose, threads: threads);
         
+        logger.LogInformation("Calculating duplicates...");
+        var imageGroups = BuildImageGroups(sourceMappedImages, similarityBar, ignoreSingletons: false).ToArray();
+        logger.LogInformation("Found {Count} duplicate groups and totally {Total} duplicate pictures in source folder.",
+            imageGroups.Length, imageGroups.Sum(t => t.Length));
+        
         logger.LogInformation("Copying images...");
         var maxDistance =
             64 - (int)Math.Round(64 * similarityBar / 100.0) + 1; // VPTree search doesn't cover the upper bound, so +1.
         var destinationImageTree = new VpTree<MappedImage>((MappedImage[])destinationMappedImages.Clone(), (x, y) => x.ImageDiff(y));
         
-        foreach (var sourceImage in sourceMappedImages)
+        foreach (var group in imageGroups)
         {
-            var duplicate = destinationImageTree.SearchByMaxDist(sourceImage, maxDistance).Select(t => t.Item1).FirstOrDefault();
+            // TODO: Move this to a helper class for getting best photo.
+            var query = group.OrderByDescending(ConvertKeepPreferenceToExpression.Convert(keepPreferences.First()));
+            query = keepPreferences.Skip(1).Aggregate(query,
+                (current, keepPreference) =>
+                    current.ThenByDescending(ConvertKeepPreferenceToExpression.Convert(keepPreference)));
+            var bestPhoto = query.First();
+            
+            var duplicate = destinationImageTree.SearchByMaxDist(bestPhoto, maxDistance).Select(t => t.Item1).FirstOrDefault();
             if (duplicate != null)
             {
-                logger.LogInformation("Found a source image {sourceImage} is a duplicate of {duplicate}. Will skip copying.", sourceImage.PhysicalPath, duplicate.PhysicalPath);
+                logger.LogInformation("Found a source image {sourceImage} is a duplicate of {duplicate}. Will skip copying.", bestPhoto.PhysicalPath, duplicate.PhysicalPath);
             }
             else
             {
                 // Copy the file.
-                logger.LogInformation("Copying {sourceImage} to {destinationFolder}.", sourceImage.PhysicalPath, destinationFolder);
+                logger.LogInformation("Copying {sourceImage} to {destinationFolder}.", bestPhoto.PhysicalPath, destinationFolder);
 
-                var sourceFilePath = sourceImage.PhysicalPath;
+                var sourceFilePath = bestPhoto.PhysicalPath;
                 while (IsSymbolicLink(sourceFilePath!))
                 {
                     sourceFilePath = new FileInfo(sourceFilePath!).ResolveLinkTarget(true)?.FullName;
                 }
                 
-                var destinationPath = Path.Combine(destinationFolder, Path.GetRelativePath(sourceFolder, sourceImage.PhysicalPath));
+                var destinationPath = Path.Combine(destinationFolder, Path.GetRelativePath(sourceFolder, bestPhoto.PhysicalPath));
+                while (File.Exists(destinationPath))
+                {
+                    logger.LogWarning("File {destinationPath} already exists. Will rename the file.", destinationPath);
+                    destinationPath = Path.Combine(destinationFolder, $"{Guid.NewGuid()}{Path.GetExtension(bestPhoto.PhysicalPath)}");
+                }
+                
                 var destinationDirectory = Path.GetDirectoryName(destinationPath);
                 if (!Directory.Exists(destinationDirectory))
                 {
@@ -259,7 +276,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         logger.LogInformation("Moved {path} to .trash folder.", photo.PhysicalPath);
     }
 
-    private IEnumerable<MappedImage[]> BuildImageGroups(MappedImage[] mappedImages, int similarityBar)
+    private IEnumerable<MappedImage[]> BuildImageGroups(MappedImage[] mappedImages, int similarityBar, bool ignoreSingletons = true)
     {
         var maxDistance =
             64 - (int)Math.Round(64 * similarityBar / 100.0) + 1; // VPTree search doesn't cover the upper bound, so +1.
@@ -274,7 +291,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
             }
         }
 
-        return dsu.AsGroups(true)
+        return dsu.AsGroups(ignoreSingletons)
             .Select(groupImgIds => groupImgIds.Select(groupImgId => mappedImages[groupImgId]).ToArray());
     }
     
