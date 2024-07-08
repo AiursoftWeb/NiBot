@@ -182,7 +182,9 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         var maxDistance =
             64 - (int)Math.Round(64 * similarityBar / 100.0) + 1; // VPTree search doesn't cover the upper bound, so +1.
         var destinationImageTree = new VpTree<MappedImage>((MappedImage[])destinationMappedImages.Clone(), (x, y) => x.ImageDiff(y));
-        
+
+        var copiedImagesCount = 0;
+        var skippedImagesCount = 0;
         foreach (var group in imageGroups)
         {
             // TODO: Move this to a helper class for getting best photo.
@@ -195,6 +197,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
             var duplicate = destinationImageTree.SearchByMaxDist(bestPhoto, maxDistance).Select(t => t.Item1).FirstOrDefault();
             if (duplicate != null)
             {
+                Interlocked.Increment(ref skippedImagesCount);
                 logger.LogInformation("Found a source image {sourceImage} is a duplicate of {duplicate}. Will skip copying.", bestPhoto.PhysicalPath, duplicate.PhysicalPath);
             }
             else
@@ -221,8 +224,12 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                     Directory.CreateDirectory(destinationDirectory!);
                 }
                 File.Copy(sourceFilePath!, destinationPath);
+                Interlocked.Increment(ref copiedImagesCount);
             }
         }
+        
+        logger.LogInformation("In the source path there are {Count} images, groupped with {GroupCount} groups. {CopiedCount} images are copied and {SkippedCount} images are skipped.",
+            sourceMappedImages.Length, imageGroups.Length, copiedImagesCount, skippedImagesCount);
     }
     
     private void CreateLink(string actualFile, string virtualFile)
