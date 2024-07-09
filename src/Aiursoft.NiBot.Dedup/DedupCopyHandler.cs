@@ -12,7 +12,7 @@ namespace Aiursoft.NiBot.Dedup;
 public class DedupCopyHandler : ExecutableCommandHandlerBuilder
 {
     protected override string Name => "dedup-copy";
-    protected override string Description => "De-duplicate images in a folder and copy them to another folder.";
+    protected override string Description => "Copy images in a folder to another folder with de-duplication. (Duplicate images in destination folder will be ignored.)";
 
     private static readonly Option<string> SourcePathOptions = new(
         ["--source", "-s"],
