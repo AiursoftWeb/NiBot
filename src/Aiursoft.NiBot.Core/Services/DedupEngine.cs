@@ -1,12 +1,14 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices;
-using Aiursoft.NiBot.Core.Models;
+﻿using Aiursoft.NiBot.Core.Models;
 using Aiursoft.NiBot.Core.Util;
 using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NiBot.Core.Services;
 
-public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
+public class DedupEngine(
+    ILogger<DedupEngine> logger, 
+    ImageHasher imageHasher, 
+    BestPhotoSelector bestPhotoSelector,
+    FilesHelper filesHelper)
 {
     /// <summary>
     /// Removes duplicate files from a given directory.
@@ -51,7 +53,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         var files = Directory.GetFiles(path, "*.*",
                 recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
             .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false) // Ignore .trash folder.
-            .Where(f => !new FileInfo(f).Attributes.HasFlag(FileAttributes.ReparsePoint)); // Ignore symbolic links.
+            .Where(f => !filesHelper.IsSymbolicLink(f)); // Ignore symbolic links. Because these symbolic links may point to the same file, but deduplication should not consider them as duplicates.
         var images = files
             .Where(file => extensions.Any(ext =>
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
@@ -67,13 +69,13 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
 
         foreach (var group in imageGroups)
         {
-            var bestPhoto = FindBestPhoto(group, keepPreferences);
+            var bestPhoto = bestPhotoSelector.FindBestPhoto(group, keepPreferences);
             logger.LogInformation("Found {Count} duplicates pictures with image {Best}", group.Length - 1,
                 bestPhoto.PhysicalPath);
 
             if (interactive)
             {
-                PreviewImage(bestPhoto.PhysicalPath);
+                filesHelper.PreviewImage(bestPhoto.PhysicalPath);
 
                 logger.LogInformation(
                     "Grayscale {grayscale}. Resolution {resolution}. Size {size}. File name {fileName} is previewing as best photo. Press ENTER to preview duplicates.",
@@ -90,7 +92,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                         photo.IsGrayscale, photo.Resolution, photo.Size, photo.PhysicalPath,
                         photo.ImageSimilarityRatio(bestPhoto) * 100 + "%",
                         action);
-                    PreviewImage(photo.PhysicalPath);
+                    filesHelper.PreviewImage(photo.PhysicalPath);
                     Console.ReadLine();
                 }
 
@@ -101,20 +103,20 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                         logger.LogInformation("Deleted {path}.", photo.PhysicalPath);
                         break;
                     case DuplicateAction.MoveToTrash:
-                        await MoveToTrashAsync(photo, path, bestPhoto.PhysicalPath);
+                        await filesHelper.MoveToTrashAsync(photo, path, bestPhoto.PhysicalPath);
                         break;
                     case DuplicateAction.Nothing:
                         logger.LogWarning(
                             "No action taken. If you want to delete or move the duplicate photos, please specify the action with --action.");
                         break;
                     case DuplicateAction.MoveToTrashAndCreateLink:
-                        await MoveToTrashAsync(photo, path, bestPhoto.PhysicalPath);
-                        CreateLink(bestPhoto.PhysicalPath, photo.PhysicalPath);
+                        await filesHelper.MoveToTrashAsync(photo, path, bestPhoto.PhysicalPath);
+                        filesHelper.CreateLink(bestPhoto.PhysicalPath, photo.PhysicalPath);
                         break;
                     case DuplicateAction.DeleteAndCreateLink:
                         File.Delete(photo.PhysicalPath);
                         logger.LogInformation("Deleted {path}.", photo.PhysicalPath);
-                        CreateLink(bestPhoto.PhysicalPath, photo.PhysicalPath);
+                        filesHelper.CreateLink(bestPhoto.PhysicalPath, photo.PhysicalPath);
                         logger.LogInformation("Deleted {path} and created a link.", photo.PhysicalPath);
                         break;
                     default:
@@ -149,6 +151,8 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         var sourceFiles = Directory.GetFiles(sourceFolder, "*.*",
                 recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
             .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false); // Ignore .trash folder.
+        // This time we don't ignore symbolic links. Because we want to copy the symbolic links' actual files to the destination folder.
+        
         var sourceImages = sourceFiles
             .Where(file => extensions.Any(ext =>
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
@@ -183,7 +187,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
         foreach (var group in imageGroups)
         {
             // TODO: Add a new UT to test the case that the best photo is valid.
-            var bestPhoto = FindBestPhoto(group, keepPreferences);
+            var bestPhoto = bestPhotoSelector.FindBestPhoto(group, keepPreferences);
             var duplicate = destinationImageTree.SearchByMaxDist(bestPhoto, maxDistance).Select(t => t.Item1).FirstOrDefault();
             if (duplicate != null)
             {
@@ -196,7 +200,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
                 logger.LogInformation("Copying {sourceImage} to {destinationFolder}.", bestPhoto.PhysicalPath, destinationFolder);
 
                 var sourceFilePath = bestPhoto.PhysicalPath;
-                while (IsSymbolicLink(sourceFilePath!))
+                while (filesHelper.IsSymbolicLink(sourceFilePath!))
                 {
                     // TODO: Add a new UT to test the case that the source file is a symbolic link.
                     sourceFilePath = new FileInfo(sourceFilePath!).ResolveLinkTarget(true)?.FullName;
@@ -225,56 +229,7 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
             sourceMappedImages.Length, imageGroups.Length, copiedImagesCount, skippedImagesCount);
     }
     
-    private void CreateLink(string actualFile, string virtualFile)
-    {
-        var virtualFilePathWithoutFileName = Path.GetDirectoryName(virtualFile)!;
-        var relativeActualFile = Path.GetRelativePath(virtualFilePathWithoutFileName, actualFile);
-        File.CreateSymbolicLink(virtualFile, relativeActualFile);
-
-        if (File.Exists(virtualFile)
-            && new FileInfo(virtualFile).Attributes.HasFlag(FileAttributes.ReparsePoint)
-            && new FileInfo(virtualFile).ResolveLinkTarget(true)?.FullName == actualFile)
-        {
-            logger.LogInformation("Created a link from {virtualFile} to {actualFile}.", virtualFile, actualFile);
-        }
-        else
-        {
-            var message = $"Failed to create a link from {virtualFile} to {actualFile}. " +
-                          $"Detailed information: " +
-                          $"Virtual File: {virtualFile}, " +
-                          $"Actual File: {actualFile}, " +
-                          $"Relative Actual File: {relativeActualFile}." +
-                          $"Virtual File Exists: {File.Exists(virtualFile)}, " +
-                          $"Virtual File Size: {new FileInfo(virtualFile).Length}, " +
-                          $"Virtual File is a link: {new FileInfo(virtualFile).Attributes.HasFlag(FileAttributes.ReparsePoint)}, " +
-                          $"Virtual File Target: {new FileInfo(virtualFile).ResolveLinkTarget(true)?.FullName}.";
-            logger.LogError(message);
-            throw new Exception(message);
-        }
-    }
-
-    private async Task MoveToTrashAsync(MappedImage photo, string path, string duplicateSourceFile)
-    {
-        var trashFolder = Path.Combine(path, ".trash");
-        if (!Directory.Exists(trashFolder))
-        {
-            Directory.CreateDirectory(trashFolder);
-        }
-
-        var trashPath = Path.Combine(trashFolder, Path.GetFileName(photo.PhysicalPath));
-        while (File.Exists(trashPath))
-        {
-            trashPath = Path.Combine(trashFolder, $"{Guid.NewGuid()}{Path.GetExtension(photo.PhysicalPath)}");
-        }
-
-        File.Move(photo.PhysicalPath, trashPath);
-        var message =
-            $"The file {photo.PhysicalPath} is moved here as {trashPath} because it's a duplicate of {duplicateSourceFile}.";
-        var messageFile = Path.Combine(trashFolder, $".duplicateReasons.txt");
-        await File.AppendAllTextAsync(messageFile, message + Environment.NewLine);
-
-        logger.LogInformation("Moved {path} to .trash folder.", photo.PhysicalPath);
-    }
+    
 
     private IEnumerable<MappedImage[]> BuildImageGroups(MappedImage[] mappedImages, int similarityBar, bool ignoreSingletons = true)
     {
@@ -295,46 +250,5 @@ public class DedupEngine(ILogger<DedupEngine> logger, ImageHasher imageHasher)
             .Select(groupImgIds => groupImgIds.Select(groupImgId => mappedImages[groupImgId]).ToArray());
     }
     
-    private bool IsSymbolicLink(string path)
-    {
-        return new FileInfo(path).Attributes.HasFlag(FileAttributes.ReparsePoint);
-    }
-
-    // ReSharper disable once UnusedMember.Local
-    private void PreviewImage(string path)
-    {
-        // Open the image in a window.
-        try
-        {
-            // If Windows:
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Process.Start("explorer.exe", path);
-            }
-            // If Linux:
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                Process.Start("xdg-open", path);
-            }
-            // If macOS:
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                Process.Start("open", path);
-            }
-        }
-        catch (Exception e)
-        {
-            logger.LogError(e, "Failed to open image {path}.", path);
-        }
-    }
-    
-    private MappedImage FindBestPhoto(IEnumerable<MappedImage> group, KeepPreference[] keepPreferences)
-    {
-        var query = group.OrderByDescending(ConvertKeepPreferenceToExpression.Convert(keepPreferences.First()));
-        query = keepPreferences.Skip(1).Aggregate(query,
-            (current, keepPreference) =>
-                current.ThenByDescending(ConvertKeepPreferenceToExpression.Convert(keepPreference)));
-        var bestPhoto = query.First();
-        return bestPhoto;
-    }
+   
 }

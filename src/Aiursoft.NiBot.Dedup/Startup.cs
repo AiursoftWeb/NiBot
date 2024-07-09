@@ -11,6 +11,8 @@ public class Startup : IStartUp
     {
         services.AddTransient<DedupEngine>();
         services.AddTransient<ImageHasher>();
+        services.AddTransient<BestPhotoSelector>();
+        services.AddTransient<FilesHelper>();
         services.AddTaskCanon();
     }
 }
