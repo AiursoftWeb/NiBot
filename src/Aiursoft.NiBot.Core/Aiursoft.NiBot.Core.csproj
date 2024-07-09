@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <Version>8.0.1</Version>
+    <TargetFramework>net8.0</TargetFramework>
+    <AssemblyName>Aiursoft.NiBot.Core</AssemblyName>
+    <RootNamespace>Aiursoft.NiBot.Core</RootNamespace>
+    <IsTestProject>false</IsTestProject>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Company>Aiursoft</Company>
+    <Product>Core</Product>
+    <Description>Nuget package of 'Core' provided by Aiursoft</Description>
+    <PackageId>Aiursoft.NiBot.Core</PackageId>
+    <PackageTags>nuget package dotnet csproj dependencies dedup image-processing</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Aiursoft.Canon" Version="8.0.4" />
+    <PackageReference Include="Aiursoft.CommandFramework.ProgressBar" Version="8.0.0" />
+    <PackageReference Include="CoenM.ImageSharp.ImageHash" Version="1.3.6" />
+    <None Include="../../README.md" Pack="true" PackagePath="." />
+  </ItemGroup>
+</Project>
