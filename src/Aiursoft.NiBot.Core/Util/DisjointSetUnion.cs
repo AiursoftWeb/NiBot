@@ -1,4 +1,4 @@
-﻿namespace Aiursoft.NiBot.Dedup.Util;
+﻿namespace Aiursoft.NiBot.Core.Util;
 
 public class DisjointSetUnion(int size)
 {

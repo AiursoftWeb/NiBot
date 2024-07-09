@@ -3,7 +3,7 @@ using System.CommandLine.Invocation;
 using Aiursoft.CommandFramework.Framework;
 using Aiursoft.CommandFramework.Models;
 using Aiursoft.CommandFramework.Services;
-using Aiursoft.NiBot.Dedup.Services;
+using Aiursoft.NiBot.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aiursoft.NiBot.Dedup;

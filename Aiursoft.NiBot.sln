@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aiursoft.NiBot.Tests", "tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aiursoft.NiBot.Dedup", "src\Aiursoft.NiBot.Dedup\Aiursoft.NiBot.Dedup.csproj", "{F4DCA6D7-0E4C-413F-846B-71A2899FFC52}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aiursoft.NiBot.Core", "src\Aiursoft.NiBot.Core\Aiursoft.NiBot.Core.csproj", "{271FE981-424B-441A-BD2D-E0F66CE119CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{F4DCA6D7-0E4C-413F-846B-71A2899FFC52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4DCA6D7-0E4C-413F-846B-71A2899FFC52}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F4DCA6D7-0E4C-413F-846B-71A2899FFC52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{271FE981-424B-441A-BD2D-E0F66CE119CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{271FE981-424B-441A-BD2D-E0F66CE119CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{271FE981-424B-441A-BD2D-E0F66CE119CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{271FE981-424B-441A-BD2D-E0F66CE119CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -39,6 +45,7 @@ Global
 		{8FEE1063-F750-43EE-8124-6A7A85BB3531} = {C3378506-CFC5-4A6D-BF31-E34D2F49830A}
 		{C4E0DD67-7F60-4EFB-8684-47A0EF8BEE4A} = {00C03649-1C34-421C-8399-2F6323C41E39}
 		{F4DCA6D7-0E4C-413F-846B-71A2899FFC52} = {C3378506-CFC5-4A6D-BF31-E34D2F49830A}
+		{271FE981-424B-441A-BD2D-E0F66CE119CB} = {C3378506-CFC5-4A6D-BF31-E34D2F49830A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BAA83CF2-A10A-43F1-B402-562B894ACF5D}

@@ -1,6 +1,6 @@
 ﻿using Aiursoft.Canon;
 using Aiursoft.CommandFramework.Abstracts;
-using Aiursoft.NiBot.Dedup.Services;
+using Aiursoft.NiBot.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Aiursoft.NiBot.Dedup;
