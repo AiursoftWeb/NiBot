@@ -225,10 +225,88 @@ public class DedupEngine(
             }
         }
         
-        logger.LogInformation("In the source path there are {Count} images, groupped with {GroupCount} groups. {CopiedCount} images are copied and {SkippedCount} images are skipped.",
+        logger.LogInformation("In the source path there are {Count} images, grouped with {GroupCount} groups. {CopiedCount} images are copied and {SkippedCount} images are skipped.",
             sourceMappedImages.Length, imageGroups.Length, copiedImagesCount, skippedImagesCount);
     }
-    
+
+    /// <summary>
+    /// Dedup patch will fetch all files from source directory and destination directory, and if a picture in source directory is a duplicate of a picture in destination directory, and source picture has a higher quality, then the source picture will be patched to the destination picture.
+    ///
+    /// This action won't dedup the source directory or the destination directory.
+    /// </summary>
+    public async Task DedupPatchAsync(
+        string sourceFolder,
+        string destinationFolder,
+        int similarityBar,
+        KeepPreference[] keepPreferences,
+        string[] extensions,
+        bool verbose, int threads)
+    {
+        if (verbose)
+        {
+            logger.LogInformation(
+                "Start patching images in {sourceFolder} to {destinationFolder}. Minimum similarity bar is {similarityBar}. Extensions: {extensions}.",
+                sourceFolder, destinationFolder, similarityBar, string.Join(", ", extensions));
+        }
+        else
+        {
+            logger.LogInformation("Start patching images in {sourceFolder} to {destinationFolder}.", sourceFolder, destinationFolder);
+        }
+        
+        var sourceFiles = Directory.GetFiles(sourceFolder, "*.*",SearchOption.AllDirectories)
+            .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false); // Ignore .trash folder.
+        // This time we don't ignore symbolic links. Because we want to copy the symbolic links' actual files to the destination folder.
+        var sourceImages = sourceFiles
+            .Where(file => extensions.Any(ext =>
+                string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
+            .ToArray();
+        
+        logger.LogInformation("Found {Count} images in {sourceFolder}. Calculating hashes...", sourceImages.Length, sourceFolder);
+        var sourceMappedImages = await imageHasher.MapImagesAsync(sourceImages, showProgress: !verbose, threads: threads);
+        
+        var destinationFiles = Directory.GetFiles(destinationFolder, "*.*", SearchOption.AllDirectories)
+            .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false) // Ignore .trash folder.
+            .Where(f => !filesHelper.IsSymbolicLink(f)); // Ignore symbolic links. Because these symbolic links may point to the same file.
+        var destinationImages = destinationFiles
+            .Where(file => extensions.Any(ext =>
+                string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
+            .ToArray();
+        
+        logger.LogInformation("Found {Count} images in {destinationFolder}. Calculating hashes...", destinationImages.Length, destinationFolder);
+        var destinationMappedImages = await imageHasher.MapImagesAsync(destinationImages.ToArray(), showProgress: !verbose, threads: threads);
+        
+        logger.LogInformation("Calculating duplicates...");
+        var mergedImages = sourceMappedImages.Concat(destinationMappedImages).ToArray();
+        
+        var imageGroups = BuildImageGroups(mergedImages, similarityBar, ignoreSingletons: false).ToArray();
+        logger.LogInformation("Found {Count} duplicate groups and totally {Total} duplicate pictures in source and destination folders.",
+            imageGroups.Length, imageGroups.Sum(t => t.Length));        
+        logger.LogInformation("Patching images...");
+        
+        var patchedImagesCount = 0;
+        foreach (var images in imageGroups)
+        {
+            var bestPhoto = bestPhotoSelector.FindBestPhoto(images, keepPreferences);
+            
+            // If best photo is in source, and there is a duplicate in destination, then patch the source to the destination.
+            if (sourceMappedImages.Contains(bestPhoto))
+            {
+                foreach (var destinationImage in images.Where(i => i!= bestPhoto))
+                {
+                    if (destinationMappedImages.Contains(destinationImage))
+                    {
+                        // Patch the source to the destination.
+                        logger.LogInformation("Patching {sourceImage} to {destinationImage}.", bestPhoto.PhysicalPath, destinationImage.PhysicalPath);
+                        File.Copy(bestPhoto.PhysicalPath, destinationImage.PhysicalPath, true);
+                        Interlocked.Increment(ref patchedImagesCount);
+                    }
+                }
+            }
+        }
+        
+        logger.LogInformation("In the source path there are {Count} images, grouped with {GroupCount} groups. {PatchedCount} images are patched.",
+            sourceMappedImages.Length, imageGroups.Length, patchedImagesCount);
+    }
     
 
     private IEnumerable<MappedImage[]> BuildImageGroups(MappedImage[] mappedImages, int similarityBar, bool ignoreSingletons = true)
