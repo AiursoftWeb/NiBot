@@ -261,9 +261,6 @@ public class DedupEngine(
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
             .ToArray();
         
-        logger.LogInformation("Found {Count} images in {sourceFolder}. Calculating hashes...", sourceImages.Length, sourceFolder);
-        var sourceMappedImages = await imageHasher.MapImagesAsync(sourceImages, showProgress: !verbose, threads: threads);
-        
         var destinationFiles = Directory.GetFiles(destinationFolder, "*.*", SearchOption.AllDirectories)
             .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false) // Ignore .trash folder.
             .Where(f => !filesHelper.IsSymbolicLink(f)); // Ignore symbolic links. Because these symbolic links may point to the same file.
@@ -272,13 +269,12 @@ public class DedupEngine(
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
             .ToArray();
         
-        logger.LogInformation("Found {Count} images in {destinationFolder}. Calculating hashes...", destinationImages.Length, destinationFolder);
-        var destinationMappedImages = await imageHasher.MapImagesAsync(destinationImages.ToArray(), showProgress: !verbose, threads: threads);
+        var mergedImages = sourceImages.Concat(destinationImages).ToArray();
         
         logger.LogInformation("Calculating duplicates...");
-        var mergedImages = sourceMappedImages.Concat(destinationMappedImages).ToArray();
+        var mappedImages = await imageHasher.MapImagesAsync(mergedImages, showProgress: !verbose, threads: threads);
         
-        var imageGroups = BuildImageGroups(mergedImages, similarityBar, ignoreSingletons: false).ToArray();
+        var imageGroups = BuildImageGroups(mappedImages, similarityBar).ToArray();
         logger.LogInformation("Found {Count} duplicate groups and totally {Total} duplicate pictures in source and destination folders.",
             imageGroups.Length, imageGroups.Sum(t => t.Length));        
         logger.LogInformation("Patching images...");
@@ -289,11 +285,11 @@ public class DedupEngine(
             var bestPhoto = bestPhotoSelector.FindBestPhoto(images, keepPreferences);
             
             // If best photo is in source, and there is a duplicate in destination, then patch the source to the destination.
-            if (sourceMappedImages.Contains(bestPhoto))
+            if (mappedImages.Contains(bestPhoto))
             {
                 foreach (var destinationImage in images.Where(i => i!= bestPhoto))
                 {
-                    if (destinationMappedImages.Contains(destinationImage))
+                    if (destinationImages.Any(di => di == destinationImage.PhysicalPath))
                     {
                         // Patch the source to the destination.
                         logger.LogInformation("Patching {sourceImage} to {destinationImage}.", bestPhoto.PhysicalPath, destinationImage.PhysicalPath);
@@ -305,7 +301,7 @@ public class DedupEngine(
         }
         
         logger.LogInformation("In the source path there are {Count} images, grouped with {GroupCount} groups. {PatchedCount} images are patched.",
-            sourceMappedImages.Length, imageGroups.Length, patchedImagesCount);
+            mappedImages.Length, imageGroups.Length, patchedImagesCount);
     }
     
 

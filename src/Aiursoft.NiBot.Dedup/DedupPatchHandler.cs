@@ -8,11 +8,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Aiursoft.NiBot.Dedup;
 
-public class DedupCopyHandler : ExecutableCommandHandlerBuilder
+public class DedupPatchHandler : ExecutableCommandHandlerBuilder
 {
-    protected override string Name => "dedup-copy";
-    protected override string Description => "Copy images in a folder to another folder with de-duplication. (Duplicate images in destination folder will be ignored.)";
-
+    protected override string Name => "dedup-patch";
+    
+    protected override string Description => "Dedup patch will fetch all files from source directory and destination directory, and if a picture in source directory is a duplicate of a picture in destination directory, and source picture has a higher quality, then the source picture will be patched to the destination picture.";
+    
     protected override IEnumerable<Option> GetCommandOptions()
     {
         return new Option[]
@@ -20,9 +21,7 @@ public class DedupCopyHandler : ExecutableCommandHandlerBuilder
             Options.SourcePathOptions,
             Options.DestinationPathOptions,
             Options.SimilarityBar,
-            Options.RecursiveOption,
             Options.KeepOption,
-            Options.YesOption,
             Options.ExtensionsOption,
             Options.ThreadsOption
         };
@@ -34,9 +33,7 @@ public class DedupCopyHandler : ExecutableCommandHandlerBuilder
         var sourcePath = context.ParseResult.GetValueForOption(Options.SourcePathOptions)!;
         var destinationPath = context.ParseResult.GetValueForOption(Options.DestinationPathOptions)!;
         var similarityBar = context.ParseResult.GetValueForOption(Options.SimilarityBar);
-        var recursive = context.ParseResult.GetValueForOption(Options.RecursiveOption);
         var keep = context.ParseResult.GetValueForOption(Options.KeepOption);
-        var yes = context.ParseResult.GetValueForOption(Options.YesOption);
         var extensions = context.ParseResult.GetValueForOption(Options.ExtensionsOption);
         var threads = context.ParseResult.GetValueForOption(Options.ThreadsOption);
         
@@ -56,13 +53,11 @@ public class DedupCopyHandler : ExecutableCommandHandlerBuilder
         var absoluteDestinationPath = Path.IsPathRooted(destinationPath)
             ? Path.GetFullPath(destinationPath)
             : Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, destinationPath));
-        await dedupEngine.DedupCopyAsync(
+        await dedupEngine.DedupPatchAsync(
             sourceFolder: absoluteSourcePath,
             destinationFolder: absoluteDestinationPath,
             similarityBar: similarityBar,
-            recursive: recursive,
             keepPreferences: keep,
-            interactive: !yes,
             extensions: extensions,
             verbose: verbose,
             threads: threads);
