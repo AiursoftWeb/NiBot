@@ -1,16 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
+    <Version>8.0.1</Version>
     <TargetFramework>net8.0</TargetFramework>
     <AssemblyName>Aiursoft.NiBot.Dedup</AssemblyName>
     <RootNamespace>Aiursoft.NiBot.Dedup</RootNamespace>
     <IsTestProject>false</IsTestProject>
-    <IsPackable>false</IsPackable>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Company>Aiursoft</Company>
+    <Product>Dedup</Product>
+    <Description>Nuget package of 'Dedup' provided by Aiursoft</Description>
+    <PackageId>Aiursoft.NiBot.Dedup</PackageId>
+    <PackageTags>nuget package dotnet csproj dependencies</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://gitlab.aiursoft.cn/aiursoft/nibot</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://gitlab.aiursoft.cn/aiursoft/nibot.git</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Aiursoft.CommandFramework" Version="8.0.6" />
+    <None Include="../../README.md" Pack="true" PackagePath="." />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Aiursoft.NiBot.Core\Aiursoft.NiBot.Core.csproj" />

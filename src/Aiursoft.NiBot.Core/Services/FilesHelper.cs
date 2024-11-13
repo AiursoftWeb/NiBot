@@ -73,22 +73,22 @@ public class FilesHelper(ILogger<FilesHelper> logger)
             // If Windows:
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Process.Start("explorer.exe", path);
+                Process.Start("explorer.exe", $@"""{path}""");
             }
             // If Linux:
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                Process.Start("xdg-open", path);
+                Process.Start("xdg-open", $@"""{path}""");
             }
             // If macOS:
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                Process.Start("open", path);
+                Process.Start("open", $@"""{path}""");
             }
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Failed to open image {path}.", path);
+            logger.LogError(e, "Failed to open image {path}.", $@"""{path}""");
         }
     }
 }
