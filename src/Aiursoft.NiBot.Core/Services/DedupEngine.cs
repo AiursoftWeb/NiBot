@@ -193,6 +193,13 @@ public class DedupEngine(
             {
                 Interlocked.Increment(ref skippedImagesCount);
                 logger.LogInformation("Found a source image {sourceImage} is a duplicate of {duplicate}. Will skip copying.", bestPhoto.PhysicalPath, duplicate.PhysicalPath);
+                if (interactive)
+                {
+                    filesHelper.PreviewImage(bestPhoto.PhysicalPath);
+                    filesHelper.PreviewImage(duplicate.PhysicalPath);
+                    logger.LogInformation("Press ENTER to continue.");
+                    Console.ReadLine();
+                }
             }
             else
             {
@@ -220,6 +227,14 @@ public class DedupEngine(
                 {
                     Directory.CreateDirectory(destinationDirectory!);
                 }
+                
+                if (interactive)
+                {
+                    filesHelper.PreviewImage(bestPhoto.PhysicalPath);
+                    logger.LogInformation("Press ENTER to copy the file from {sourcePath} to {destinationPath}.", sourceFilePath, destinationPath);
+                    Console.ReadLine();
+                }
+                
                 File.Copy(sourceFilePath!, destinationPath);
                 Interlocked.Increment(ref copiedImagesCount);
             }
