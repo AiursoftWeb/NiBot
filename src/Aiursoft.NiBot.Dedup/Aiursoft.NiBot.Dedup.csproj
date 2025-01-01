@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <Version>8.0.2</Version>
-    <TargetFramework>net8.0</TargetFramework>
+    <Version>8.0.3</Version>
+    <TargetFramework>net9.0</TargetFramework>
     <AssemblyName>Aiursoft.NiBot.Dedup</AssemblyName>
     <RootNamespace>Aiursoft.NiBot.Dedup</RootNamespace>
     <IsTestProject>false</IsTestProject>
@@ -22,7 +22,7 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Aiursoft.CommandFramework" Version="8.0.6" />
+    <PackageReference Include="Aiursoft.CommandFramework" Version="9.0.1" />
     <None Include="../../README.md" Pack="true" PackagePath="." />
   </ItemGroup>
   <ItemGroup>
