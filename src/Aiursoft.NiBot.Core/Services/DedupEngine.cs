@@ -5,8 +5,8 @@ using Microsoft.Extensions.Logging;
 namespace Aiursoft.NiBot.Core.Services;
 
 public class DedupEngine(
-    ILogger<DedupEngine> logger, 
-    ImageHasher imageHasher, 
+    ILogger<DedupEngine> logger,
+    ImageHasher imageHasher,
     BestPhotoSelector bestPhotoSelector,
     FilesHelper filesHelper)
 {
@@ -53,7 +53,9 @@ public class DedupEngine(
         var files = Directory.GetFiles(path, "*.*",
                 recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
             .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false) // Ignore .trash folder.
-            .Where(f => !filesHelper.IsSymbolicLink(f)); // Ignore symbolic links. Because these symbolic links may point to the same file, but deduplication should not consider them as duplicates.
+            .Where(f => !filesHelper
+                .IsSymbolicLink(
+                    f)); // Ignore symbolic links. Because these symbolic links may point to the same file, but deduplication should not consider them as duplicates.
         var images = files
             .Where(file => extensions.Any(ext =>
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
@@ -152,14 +154,16 @@ public class DedupEngine(
                 recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
             .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false); // Ignore .trash folder.
         // This time we don't ignore symbolic links. Because we want to copy the symbolic links' actual files to the destination folder.
-        
+
         var sourceImages = sourceFiles
             .Where(file => extensions.Any(ext =>
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
             .ToArray();
-        
-        logger.LogInformation("Found {Count} images in {sourceFolder}. Calculating hashes...", sourceImages.Length, sourceFolder);
-        var sourceMappedImages = await imageHasher.MapImagesAsync(sourceImages, showProgress: !verbose, threads: threads);
+
+        logger.LogInformation("Found {Count} images in {sourceFolder}. Calculating hashes...", sourceImages.Length,
+            sourceFolder);
+        var sourceMappedImages =
+            await imageHasher.MapImagesAsync(sourceImages, showProgress: !verbose, threads: threads);
 
         var destinationFiles = Directory.GetFiles(destinationFolder, "*.*",
                 recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
@@ -169,18 +173,21 @@ public class DedupEngine(
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
             .ToArray();
 
-        logger.LogInformation("Found {Count} images in {destinationFolder}. Calculating hashes...", destinationImages.Length, destinationFolder);
-        var destinationMappedImages = await imageHasher.MapImagesAsync(destinationImages.ToArray(), showProgress: !verbose, threads: threads);
-        
+        logger.LogInformation("Found {Count} images in {destinationFolder}. Calculating hashes...",
+            destinationImages.Length, destinationFolder);
+        var destinationMappedImages =
+            await imageHasher.MapImagesAsync(destinationImages.ToArray(), showProgress: !verbose, threads: threads);
+
         logger.LogInformation("Calculating duplicates...");
         var imageGroups = BuildImageGroups(sourceMappedImages, similarityBar, ignoreSingletons: false).ToArray();
         logger.LogInformation("Found {Count} duplicate groups and totally {Total} duplicate pictures in source folder.",
             imageGroups.Length, imageGroups.Sum(t => t.Length));
-        
+
         logger.LogInformation("Copying images...");
         var maxDistance =
             64 - (int)Math.Round(64 * similarityBar / 100.0) + 1; // VPTree search doesn't cover the upper bound, so +1.
-        var destinationImageTree = new VpTree<MappedImage>((MappedImage[])destinationMappedImages.Clone(), (x, y) => x.ImageDiff(y));
+        var destinationImageTree =
+            new VpTree<MappedImage>((MappedImage[])destinationMappedImages.Clone(), (x, y) => x.ImageDiff(y));
 
         var copiedImagesCount = 0;
         var skippedImagesCount = 0;
@@ -188,11 +195,14 @@ public class DedupEngine(
         {
             // TODO: Add a new UT to test the case that the best photo is valid.
             var bestPhoto = bestPhotoSelector.FindBestPhoto(group, keepPreferences);
-            var duplicate = destinationImageTree.SearchByMaxDist(bestPhoto, maxDistance).Select(t => t.Item1).FirstOrDefault();
+            var duplicate = destinationImageTree.SearchByMaxDist(bestPhoto, maxDistance).Select(t => t.Item1)
+                .FirstOrDefault();
             if (duplicate != null)
             {
                 Interlocked.Increment(ref skippedImagesCount);
-                logger.LogInformation("Found a source image {sourceImage} is a duplicate of {duplicate}. Will skip copying.", bestPhoto.PhysicalPath, duplicate.PhysicalPath);
+                logger.LogInformation(
+                    "Found a source image {sourceImage} is a duplicate of {duplicate}. Will skip copying.",
+                    bestPhoto.PhysicalPath, duplicate.PhysicalPath);
                 if (interactive)
                 {
                     filesHelper.PreviewImage(bestPhoto.PhysicalPath);
@@ -204,7 +214,8 @@ public class DedupEngine(
             else
             {
                 // Copy the file.
-                logger.LogInformation("Copying {sourceImage} to {destinationFolder}.", bestPhoto.PhysicalPath, destinationFolder);
+                logger.LogInformation("Copying {sourceImage} to {destinationFolder}.", bestPhoto.PhysicalPath,
+                    destinationFolder);
 
                 var sourceFilePath = bestPhoto.PhysicalPath;
                 while (filesHelper.IsSymbolicLink(sourceFilePath!))
@@ -212,35 +223,39 @@ public class DedupEngine(
                     // TODO: Add a new UT to test the case that the source file is a symbolic link.
                     sourceFilePath = new FileInfo(sourceFilePath!).ResolveLinkTarget(true)?.FullName;
                 }
-                
+
                 // TODO: Add a new UT to test the case that the destination file already exists.
                 // TODO: Add a new UT to test the case that the destination file is not under root of the destination folder.
-                var destinationPath = Path.Combine(destinationFolder, Path.GetRelativePath(sourceFolder, bestPhoto.PhysicalPath));
+                var destinationPath = Path.Combine(destinationFolder,
+                    Path.GetRelativePath(sourceFolder, bestPhoto.PhysicalPath));
                 while (File.Exists(destinationPath))
                 {
                     logger.LogWarning("File {destinationPath} already exists. Will rename the file.", destinationPath);
-                    destinationPath = Path.Combine(destinationFolder, $"{Guid.NewGuid()}{Path.GetExtension(bestPhoto.PhysicalPath)}");
+                    destinationPath = Path.Combine(destinationFolder,
+                        $"{Guid.NewGuid()}{Path.GetExtension(bestPhoto.PhysicalPath)}");
                 }
-                
+
                 var destinationDirectory = Path.GetDirectoryName(destinationPath);
                 if (!Directory.Exists(destinationDirectory))
                 {
                     Directory.CreateDirectory(destinationDirectory!);
                 }
-                
+
                 if (interactive)
                 {
                     filesHelper.PreviewImage(bestPhoto.PhysicalPath);
-                    logger.LogInformation("Press ENTER to copy the file from {sourcePath} to {destinationPath}.", sourceFilePath, destinationPath);
+                    logger.LogInformation("Press ENTER to copy the file from {sourcePath} to {destinationPath}.",
+                        sourceFilePath, destinationPath);
                     Console.ReadLine();
                 }
-                
+
                 File.Copy(sourceFilePath!, destinationPath);
                 Interlocked.Increment(ref copiedImagesCount);
             }
         }
-        
-        logger.LogInformation("In the source path there are {Count} images, grouped with {GroupCount} groups. {CopiedCount} images are copied and {SkippedCount} images are skipped.",
+
+        logger.LogInformation(
+            "In the source path there are {Count} images, grouped with {GroupCount} groups. {CopiedCount} images are copied and {SkippedCount} images are skipped.",
             sourceMappedImages.Length, imageGroups.Length, copiedImagesCount, skippedImagesCount);
     }
 
@@ -265,62 +280,179 @@ public class DedupEngine(
         }
         else
         {
-            logger.LogInformation("Start patching images in {sourceFolder} to {destinationFolder}.", sourceFolder, destinationFolder);
+            logger.LogInformation("Start patching images in {sourceFolder} to {destinationFolder}.", sourceFolder,
+                destinationFolder);
         }
-        
-        var sourceFiles = Directory.GetFiles(sourceFolder, "*.*",SearchOption.AllDirectories)
+
+        var sourceFiles = Directory.GetFiles(sourceFolder, "*.*", SearchOption.AllDirectories)
             .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false); // Ignore .trash folder.
         // This time we don't ignore symbolic links. Because we want to copy the symbolic links' actual files to the destination folder.
         var sourceImages = sourceFiles
             .Where(file => extensions.Any(ext =>
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
             .ToArray();
-        
+
         var destinationFiles = Directory.GetFiles(destinationFolder, "*.*", SearchOption.AllDirectories)
             .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false) // Ignore .trash folder.
-            .Where(f => !filesHelper.IsSymbolicLink(f)); // Ignore symbolic links. Because these symbolic links may point to the same file.
+            .Where(f => !filesHelper
+                .IsSymbolicLink(f)); // Ignore symbolic links. Because these symbolic links may point to the same file.
         var destinationImages = destinationFiles
             .Where(file => extensions.Any(ext =>
                 string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
             .ToArray();
-        
+
         var mergedImages = sourceImages.Concat(destinationImages).ToArray();
-        
+
         logger.LogInformation("Calculating duplicates...");
         var mappedImages = await imageHasher.MapImagesAsync(mergedImages, showProgress: !verbose, threads: threads);
-        
+
         var imageGroups = BuildImageGroups(mappedImages, similarityBar).ToArray();
-        logger.LogInformation("Found {Count} duplicate groups and totally {Total} duplicate pictures in source and destination folders.",
-            imageGroups.Length, imageGroups.Sum(t => t.Length));        
+        logger.LogInformation(
+            "Found {Count} duplicate groups and totally {Total} duplicate pictures in source and destination folders.",
+            imageGroups.Length, imageGroups.Sum(t => t.Length));
         logger.LogInformation("Patching images...");
-        
+
         var patchedImagesCount = 0;
         foreach (var images in imageGroups)
         {
             var bestPhoto = bestPhotoSelector.FindBestPhoto(images, keepPreferences);
-            
+
             // If best photo is in source, and there is a duplicate in destination, then patch the source to the destination.
             if (mappedImages.Contains(bestPhoto))
             {
-                foreach (var destinationImage in images.Where(i => i!= bestPhoto))
+                foreach (var destinationImage in images.Where(i => i != bestPhoto))
                 {
                     if (destinationImages.Any(di => di == destinationImage.PhysicalPath))
                     {
                         // Patch the source to the destination.
-                        logger.LogInformation("Patching {sourceImage} to {destinationImage}.", bestPhoto.PhysicalPath, destinationImage.PhysicalPath);
+                        logger.LogInformation("Patching {sourceImage} to {destinationImage}.", bestPhoto.PhysicalPath,
+                            destinationImage.PhysicalPath);
                         File.Copy(bestPhoto.PhysicalPath, destinationImage.PhysicalPath, true);
                         Interlocked.Increment(ref patchedImagesCount);
                     }
                 }
             }
         }
-        
-        logger.LogInformation("In the source path there are {Count} images, grouped with {GroupCount} groups. {PatchedCount} images are patched.",
+
+        logger.LogInformation(
+            "In the source path there are {Count} images, grouped with {GroupCount} groups. {PatchedCount} images are patched.",
             mappedImages.Length, imageGroups.Length, patchedImagesCount);
     }
-    
 
-    private IEnumerable<MappedImage[]> BuildImageGroups(MappedImage[] mappedImages, int similarityBar, bool ignoreSingletons = true)
+    /// <summary>
+    /// Clusters images from a given directory and redistributes them into separate group folders.
+    /// </summary>
+    /// <param name="path">The path of the directory to perform clustering distribution on.</param>
+    /// <param name="similarityBar">The similarity threshold (0-100) used to group similar images.</param>
+    /// <param name="recursive">A flag indicating whether to process subdirectories recursively.</param>
+    /// <param name="interactive">
+    /// When true, the program will prompt the user for confirmation before moving images.
+    /// </param>
+    /// <param name="extensions">
+    /// An array of file extensions to consider. Only files with these extensions will be processed.
+    /// </param>
+    /// <param name="verbose">A flag indicating whether to output verbose log messages.</param>
+    /// <param name="threads">The number of threads to use for image hashing.</param>
+    /// <returns>
+    /// A Task representing the asynchronous clustering distribution operation.
+    /// </returns>
+    public async Task ClusterDistributeAsync(
+        string path,
+        int similarityBar,
+        bool recursive,
+        bool interactive,
+        string[] extensions,
+        bool verbose,
+        int threads)
+    {
+        if (verbose)
+        {
+            logger.LogInformation(
+                "Start clustering images in {path}. Similarity threshold: {similarityBar}. Recursive: {recursive}. Extensions: {extensions}.",
+                path, similarityBar, recursive, string.Join(", ", extensions));
+        }
+        else
+        {
+            logger.LogInformation("Start clustering images in {path}.", path);
+        }
+
+        // 获取所有文件（忽略 .trash 文件夹以及符号链接）
+        var files = Directory
+            .GetFiles(path, "*.*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly)
+            .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false)
+            .Where(f => !filesHelper.IsSymbolicLink(f));
+        var images = files
+            .Where(file => extensions.Any(ext =>
+                string.Equals(Path.GetExtension(file).TrimStart('.'), ext, StringComparison.OrdinalIgnoreCase)))
+            .ToArray();
+
+        logger.LogInformation("Found {Count} images in {path}. Calculating hashes...", images.Length, path);
+        var mappedImages = await imageHasher.MapImagesAsync(images, showProgress: !verbose, threads: threads);
+
+        logger.LogInformation("Clustering images...");
+        var imageGroups = BuildImageGroups(mappedImages, similarityBar, ignoreSingletons: false).ToArray();
+
+        var groupCount = imageGroups.Length;
+        var totalImages = mappedImages.Length;
+        var averagePerGroup = groupCount > 0 ? (double)totalImages / groupCount : 0;
+        logger.LogInformation("Clustering resulted in {GroupCount} groups, averaging {Average} images per group.",
+            groupCount, averagePerGroup);
+
+        if (interactive)
+        {
+            logger.LogInformation("Press ENTER to confirm moving images into cluster folders.");
+            Console.ReadLine();
+        }
+
+        var groupIndex = 1;
+        foreach (var group in imageGroups)
+        {
+            var groupFolderName = $"group-{groupIndex}";
+            var groupFolderPath = Path.Combine(path, groupFolderName);
+            if (!Directory.Exists(groupFolderPath))
+            {
+                Directory.CreateDirectory(groupFolderPath);
+            }
+
+            foreach (var image in group)
+            {
+                var sourceFilePath = image.PhysicalPath;
+                var fileName = Path.GetFileName(sourceFilePath);
+                var destinationPath = Path.Combine(groupFolderPath, fileName);
+
+                // 如果目标文件已经存在，则生成新的文件名
+                while (File.Exists(destinationPath))
+                {
+                    fileName =
+                        $"{Path.GetFileNameWithoutExtension(sourceFilePath)}_{Guid.NewGuid()}{Path.GetExtension(sourceFilePath)}";
+                    destinationPath = Path.Combine(groupFolderPath, fileName);
+                }
+
+                if (interactive)
+                {
+                    logger.LogInformation(
+                        "About to move file {sourceFilePath} to {destinationPath}. Press ENTER to confirm.",
+                        sourceFilePath, destinationPath);
+                    filesHelper.PreviewImage(sourceFilePath);
+                    Console.ReadLine();
+                }
+
+                File.Move(sourceFilePath, destinationPath);
+                logger.LogInformation("Moved file {sourceFilePath} to {destinationPath}.", sourceFilePath,
+                    destinationPath);
+            }
+
+            groupIndex++;
+        }
+
+        logger.LogInformation(
+            "Cluster distribution completed. Total groups: {GroupCount}, Total images processed: {TotalImages}.",
+            groupCount, totalImages);
+    }
+
+
+    private IEnumerable<MappedImage[]> BuildImageGroups(MappedImage[] mappedImages, int similarityBar,
+        bool ignoreSingletons = true)
     {
         var maxDistance =
             64 - (int)Math.Round(64 * similarityBar / 100.0) + 1; // VPTree search doesn't cover the upper bound, so +1.
@@ -338,6 +470,4 @@ public class DedupEngine(
         return dsu.AsGroups(ignoreSingletons)
             .Select(groupImgIds => groupImgIds.Select(groupImgId => mappedImages[groupImgId]).ToArray());
     }
-    
-   
 }
