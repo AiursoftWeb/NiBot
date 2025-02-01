@@ -340,10 +340,10 @@ public class DedupEngine(
     }
 
     /// <summary>
-    /// Clusters images from a given directory and redistributes them into separate group folders.
+    /// Clusters images from a given directory using a K-Means algorithm (based on image hash) and redistributes them into separate group folders.
     /// </summary>
     /// <param name="path">The path of the directory to perform clustering distribution on.</param>
-    /// <param name="similarityBar">The similarity threshold (0-100) used to group similar images.</param>
+    /// <param name="similarityBar">A parameter (0-100) used to adjust clustering granularity. Higher value means images need to be more similar to fall in the same cluster.</param>
     /// <param name="recursive">A flag indicating whether to process subdirectories recursively.</param>
     /// <param name="interactive">
     /// When true, the program will prompt the user for confirmation before moving images.
@@ -353,9 +353,7 @@ public class DedupEngine(
     /// </param>
     /// <param name="verbose">A flag indicating whether to output verbose log messages.</param>
     /// <param name="threads">The number of threads to use for image hashing.</param>
-    /// <returns>
-    /// A Task representing the asynchronous clustering distribution operation.
-    /// </returns>
+    /// <returns>A Task representing the asynchronous clustering distribution operation.</returns>
     public async Task ClusterDistributeAsync(
         string path,
         int similarityBar,
@@ -368,7 +366,7 @@ public class DedupEngine(
         if (verbose)
         {
             logger.LogInformation(
-                "Start clustering images in {path}. Similarity threshold: {similarityBar}. Recursive: {recursive}. Extensions: {extensions}.",
+                "Start clustering images in {path}. Similarity parameter: {similarityBar}. Recursive: {recursive}. Extensions: {extensions}.",
                 path, similarityBar, recursive, string.Join(", ", extensions));
         }
         else
@@ -389,12 +387,127 @@ public class DedupEngine(
         logger.LogInformation("Found {Count} images in {path}. Calculating hashes...", images.Length, path);
         var mappedImages = await imageHasher.MapImagesAsync(images, showProgress: !verbose, threads: threads);
 
-        logger.LogInformation("Clustering images...");
-        var imageGroups = BuildImageGroups(mappedImages, similarityBar, ignoreSingletons: false).ToArray();
+        int totalImages = mappedImages.Length;
+        if (totalImages == 0)
+        {
+            logger.LogWarning("No images found in the given path.");
+            return;
+        }
 
-        var groupCount = imageGroups.Length;
-        var totalImages = mappedImages.Length;
-        var averagePerGroup = groupCount > 0 ? (double)totalImages / groupCount : 0;
+        // 将每个图片的 64 位哈希转换为 64 维二值向量
+        var points = new double[totalImages][];
+        for (int i = 0; i < totalImages; i++)
+        {
+            points[i] = ConvertToVector(mappedImages[i]);
+        }
+
+        // 根据总图片数和 similarityBar 估算聚类数 k
+        int k = Math.Max(1, (int)Math.Ceiling(Math.Sqrt(totalImages) * (similarityBar / 100.0) + 1));
+        logger.LogInformation("Clustering into {K} clusters.", k);
+
+        // --- K-Means 算法 ---
+        // 随机初始化 k 个中心
+        double[][] centers = new double[k][];
+        Random rand = new Random();
+        var chosenIndices = new HashSet<int>();
+        for (int i = 0; i < k; i++)
+        {
+            int idx;
+            do
+            {
+                idx = rand.Next(totalImages);
+            } while (!chosenIndices.Add(idx));
+
+            centers[i] = (double[])points[idx].Clone();
+        }
+
+        int[] assignments = new int[totalImages];
+        bool changed = true;
+        int iterations = 0;
+        int maxIterations = 20;
+
+        while (changed && iterations < maxIterations)
+        {
+            changed = false;
+            // 分配阶段：将每个点归入距离最近的中心
+            for (int i = 0; i < totalImages; i++)
+            {
+                double bestDist = double.MaxValue;
+                int bestCluster = 0;
+                for (int j = 0; j < k; j++)
+                {
+                    double dist = EuclideanDistanceSquared(points[i], centers[j]);
+                    if (dist < bestDist)
+                    {
+                        bestDist = dist;
+                        bestCluster = j;
+                    }
+                }
+
+                if (assignments[i] != bestCluster)
+                {
+                    assignments[i] = bestCluster;
+                    changed = true;
+                }
+            }
+
+            // 更新阶段：对每个聚类，重新计算中心（取所有向量的均值）
+            double[][] newCenters = new double[k][];
+            int[] counts = new int[k];
+            for (int j = 0; j < k; j++)
+            {
+                newCenters[j] = new double[64]; // 64 维
+            }
+
+            for (int i = 0; i < totalImages; i++)
+            {
+                int cluster = assignments[i];
+                counts[cluster]++;
+                for (int d = 0; d < 64; d++)
+                {
+                    newCenters[cluster][d] += points[i][d];
+                }
+            }
+
+            for (int j = 0; j < k; j++)
+            {
+                if (counts[j] > 0)
+                {
+                    for (int d = 0; d < 64; d++)
+                    {
+                        newCenters[j][d] /= counts[j];
+                    }
+                }
+                else
+                {
+                    // 如果某个聚类没有任何点，则随机重置中心
+                    int idx = rand.Next(totalImages);
+                    newCenters[j] = (double[])points[idx].Clone();
+                }
+            }
+
+            centers = newCenters;
+            iterations++;
+        }
+        // --- K-Means 算法结束 ---
+
+        // 根据 assignments 构造每个聚类的图片列表
+        var clusters = new List<List<MappedImage>>();
+        for (int j = 0; j < k; j++)
+        {
+            clusters.Add(new List<MappedImage>());
+        }
+
+        for (int i = 0; i < totalImages; i++)
+        {
+            clusters[assignments[i]].Add(mappedImages[i]);
+        }
+
+        // 移除空的聚类
+        clusters = clusters.Where(c => c.Count > 0).ToList();
+
+        int groupCount = clusters.Count;
+        double averagePerGroup = groupCount > 0 ? (double)totalImages / groupCount : 0;
         logger.LogInformation("Clustering resulted in {GroupCount} groups, averaging {Average} images per group.",
             groupCount, averagePerGroup);
 
@@ -404,8 +517,9 @@ public class DedupEngine(
             Console.ReadLine();
         }
 
-        var groupIndex = 1;
-        foreach (var group in imageGroups)
+        // 将每个聚类内的图片移入新建的子文件夹（例如 group-1、group-2 等）
+        int groupIndex = 1;
+        foreach (var cluster in clusters)
         {
             var groupFolderName = $"group-{groupIndex}";
             var groupFolderPath = Path.Combine(path, groupFolderName);
@@ -414,13 +528,13 @@ public class DedupEngine(
                 Directory.CreateDirectory(groupFolderPath);
             }
 
-            foreach (var image in group)
+            foreach (var image in cluster)
             {
                 var sourceFilePath = image.PhysicalPath;
                 var fileName = Path.GetFileName(sourceFilePath);
                 var destinationPath = Path.Combine(groupFolderPath, fileName);
 
-                // 如果目标文件已经存在，则生成新的文件名
+                // 如果目标文件存在，则生成新文件名
                 while (File.Exists(destinationPath))
                 {
                     fileName =
@@ -448,8 +562,35 @@ public class DedupEngine(
         logger.LogInformation(
             "Cluster distribution completed. Total groups: {GroupCount}, Total images processed: {TotalImages}.",
             groupCount, totalImages);
-    }
 
+        // --- 本方法中使用的辅助函数 ---
+        // 将图片的 Hash 转换为 64 维二值向量
+        double[] ConvertToVector(MappedImage image)
+        {
+            var vector = new double[64];
+            // 假设 image.Hash 为 64 位整数（例如 ulong）
+            ulong hash = image.Hash;
+            for (int i = 0; i < 64; i++)
+            {
+                vector[i] = ((hash >> i) & 1UL) == 1UL ? 1.0 : 0.0;
+            }
+
+            return vector;
+        }
+
+        // 计算两个 64 维向量之间的欧式距离平方
+        double EuclideanDistanceSquared(double[] a, double[] b)
+        {
+            double sum = 0.0;
+            for (int i = 0; i < a.Length; i++)
+            {
+                double diff = a[i] - b[i];
+                sum += diff * diff;
+            }
+
+            return sum;
+        }
+    }
 
     private IEnumerable<MappedImage[]> BuildImageGroups(MappedImage[] mappedImages, int similarityBar,
         bool ignoreSingletons = true)

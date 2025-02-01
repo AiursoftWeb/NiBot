@@ -23,10 +23,10 @@ public class CompareHandler : ExecutableCommandHandlerBuilder
 
     protected override IEnumerable<Option> GetCommandOptions()
     {
-        return new Option[]
-        {
+        return
+        [
             PathsOptions
-        };
+        ];
     }
 
     protected override async Task Execute(InvocationContext context)

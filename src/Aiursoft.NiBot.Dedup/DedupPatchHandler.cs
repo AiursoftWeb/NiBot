@@ -16,15 +16,15 @@ public class DedupPatchHandler : ExecutableCommandHandlerBuilder
     
     protected override IEnumerable<Option> GetCommandOptions()
     {
-        return new Option[]
-        {
+        return
+        [
             Options.SourcePathOptions,
             Options.DestinationPathOptions,
             Options.SimilarityBar,
             Options.KeepOption,
             Options.ExtensionsOption,
             Options.ThreadsOption
-        };
+        ];
     }
     
     protected override async Task Execute(InvocationContext context)

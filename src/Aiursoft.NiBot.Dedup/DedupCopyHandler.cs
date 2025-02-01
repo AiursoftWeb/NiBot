@@ -15,8 +15,8 @@ public class DedupCopyHandler : ExecutableCommandHandlerBuilder
 
     protected override IEnumerable<Option> GetCommandOptions()
     {
-        return new Option[]
-        {
+        return
+        [
             Options.SourcePathOptions,
             Options.DestinationPathOptions,
             Options.SimilarityBar,
@@ -25,7 +25,7 @@ public class DedupCopyHandler : ExecutableCommandHandlerBuilder
             Options.YesOption,
             Options.ExtensionsOption,
             Options.ThreadsOption
-        };
+        ];
     }
     
     protected override async Task Execute(InvocationContext context)

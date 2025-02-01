@@ -12,7 +12,7 @@ public class ImageHasher(ILogger<DedupEngine> logger, CanonPool canonPool)
     public async Task<MappedImage[]> MapImagesAsync(string[] imagePaths, bool showProgress, int threads)
     {
         var hashAlgo = new PerceptualHash();
-        ConcurrentBag<MappedImage> mappedImages = new();
+        ConcurrentBag<MappedImage> mappedImages = [];
         
         // Progress bar.
         ProgressBar? bar = null;
