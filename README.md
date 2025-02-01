@@ -29,7 +29,7 @@ dotnet tool install --global Aiursoft.NiBot
 After getting the binary, run it directly in the terminal.
 
 ```bash
-$ NiBot dedup
+$ nibot dedup
 Option '--path' is required.
 
 Description:
