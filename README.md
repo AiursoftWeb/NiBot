@@ -86,6 +86,18 @@ Then you can use the `DedupEngine` class to de-duplicate images in your own code
 
 That's it!
 
+## Run locally
+
+Requirements about how to run
+
+1. [.NET 9 SDK](http://dot.net/)
+2. Execute `dotnet run` to run the app
+
+## Run in Microsoft Visual Studio
+
+1. Open the `.sln` file in the project path.
+2. Press `F5`.
+
 ## How to contribute
 
 There are many ways to contribute to the project: logging bugs, submitting pull requests, reporting issues, and creating suggestions.
