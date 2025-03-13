@@ -12,7 +12,7 @@ Suppose you enjoy collecting images and intensively gather a large number of the
 
 However, you discover that a significant portion of these downloaded CG images are duplicates, occupying precious disk space. Therefore, you urgently need a fast method to identify and remove duplicates from your CG directory. Since the sources of these downloads vary, traditional methods such as searching by file names are clearly inadequate for solving this problem; it's necessary to analyze the content of the images.
 
-## Install
+## Installation
 
 Requirements:
 
