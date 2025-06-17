@@ -10,7 +10,7 @@ namespace Aiursoft.NiBot.Dedup
 {
     public class DupTopHandler : ExecutableCommandHandlerBuilder
     {
-        protected override string Name => "duptop";
+        protected override string Name => "dup-top";
         protected override string Description => "Find top similar images in a folder compared to a source image.";
 
         private static readonly Option<string> SourceOption = new(
@@ -19,7 +19,7 @@ namespace Aiursoft.NiBot.Dedup
         { IsRequired = true };
 
         private static readonly Option<int> TopOption = new(
-            ["--top", "-t"],
+            ["--top"],
             () => 15,
             "Number of top similar images to return.");
 
