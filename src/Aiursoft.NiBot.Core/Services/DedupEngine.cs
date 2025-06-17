@@ -495,7 +495,7 @@ public class DedupEngine(
         var clusters = new List<List<MappedImage>>();
         for (int j = 0; j < k; j++)
         {
-            clusters.Add(new List<MappedImage>());
+            clusters.Add([]);
         }
 
         for (int i = 0; i < totalImages; i++)

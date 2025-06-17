@@ -8,6 +8,6 @@ return await new NestedCommandApp()
     .WithFeature(new DedupCopyHandler()) // Dedup copy handler will copy images from source to destination without creating duplicates.
     .WithFeature(new DedupPatchHandler()) // Dedup patch handler will only copy duplicate and better quality images from source to destination.
     .WithFeature(new CompareHandler())
-    .WithFeature(new ClusterDistributeHandler())
+    .WithFeature(new DupTopHandler())
     .RunAsync(args);
 
