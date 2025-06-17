@@ -14,13 +14,8 @@ namespace Aiursoft.NiBot.Dedup
         protected override string Description => "Find top similar images in a folder compared to a source image.";
 
         private static readonly Option<string> SourceOption = new(
-                ["--source", "-s"],
+                ["--input", "-i"],
             "Path to the source image for comparison.")
-        { IsRequired = true };
-
-        private static readonly Option<string> FolderOption = new(
-                ["--folder", "-f"],
-            "Path to the folder containing images to compare against.")
         { IsRequired = true };
 
         private static readonly Option<int> TopOption = new(
@@ -30,46 +25,53 @@ namespace Aiursoft.NiBot.Dedup
 
         protected override IEnumerable<Option> GetCommandOptions()
         {
-            return [SourceOption, FolderOption, TopOption];
+            return [
+                SourceOption,
+                Options.SourcePathOptions,
+                Options.RecursiveOption,
+                Options.ExtensionsOption,
+                Options.ThreadsOption,
+                TopOption
+            ];
         }
 
         protected override async Task Execute(InvocationContext context)
         {
             var verbose = context.ParseResult.GetValueForOption(CommonOptionsProvider.VerboseOption);
             var sourcePath = context.ParseResult.GetValueForOption(SourceOption)!;
-            var folderPath = context.ParseResult.GetValueForOption(FolderOption)!;
+            var folderPath = context.ParseResult.GetValueForOption(Options.SourcePathOptions)!;
+            var recursive = context.ParseResult.GetValueForOption(Options.RecursiveOption);
             var top = context.ParseResult.GetValueForOption(TopOption);
+            var extensions = context.ParseResult.GetValueForOption(Options.ExtensionsOption)!;
+            var threads = context.ParseResult.GetValueForOption(Options.ThreadsOption);
 
             var services = ServiceBuilder
                 .CreateCommandHostBuilder<Startup>(verbose)
                 .Build()
                 .Services;
             var imageHasher = services.GetRequiredService<ImageHasher>();
+            var filesHelper = services.GetRequiredService<FilesHelper>();
 
-            // 归一化路径
             var absoluteSource = Path.GetFullPath(sourcePath);
             var absoluteFolder = Path.GetFullPath(folderPath);
 
-            // 加载并计算源图哈希
             var sourceMapped = await imageHasher.MapImagesAsync([absoluteSource], showProgress: !verbose, threads: 1);
             var sourceImage = sourceMapped.First();
 
-            // 获取目标文件夹所有图片
-            var files = Directory.GetFiles(absoluteFolder, "*.*", SearchOption.TopDirectoryOnly)
-                .Where(f => !new FileInfo(f).DirectoryName?.EndsWith(".trash") ?? false)
-                .Where(f => !services.GetRequiredService<FilesHelper>().IsSymbolicLink(f))
-                .ToArray();
+            var mappedImages = await filesHelper.GetPhotosUnderPath(
+                path: absoluteFolder,
+                recursive: recursive,
+                verbose: verbose,
+                extensions: extensions,
+                includeSymbolicLinks: false,
+                threads: threads);
 
-            var mappedImages = await imageHasher.MapImagesAsync(files, showProgress: !verbose, threads: Environment.ProcessorCount);
-
-            // 计算相似度并排序
             var results = mappedImages
                 .Select(m => new { Path = m.PhysicalPath, Ratio = m.ImageSimilarityRatio(sourceImage) })
                 .OrderByDescending(x => x.Ratio)
                 .Take(top)
                 .ToList();
 
-            // 输出结果
             Console.WriteLine($"Top {top} similar images for '{absoluteSource}':");
             foreach (var item in results)
             {
