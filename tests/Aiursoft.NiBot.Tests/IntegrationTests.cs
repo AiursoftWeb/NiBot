@@ -2,7 +2,6 @@
 using Aiursoft.CommandFramework.Models;
 using Aiursoft.CSTools.Tools;
 using Aiursoft.NiBot.Dedup;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Aiursoft.NiBot.Tests;
 
@@ -115,7 +114,7 @@ public class IntegrationTests
         Assert.IsTrue(duplicateReasons.Contains("because it's a duplicate of"));
         Assert.IsTrue(duplicateReasons.Contains("p2.png"));
     }
-    
+
     [TestMethod]
     public async Task InvokeDedupXPlane()
     {
@@ -232,10 +231,10 @@ public class IntegrationTests
         var mcPath = Path.Combine(_tempAssetsFolder, "mc");
         var xpPath = Path.Combine(_tempAssetsFolder, "xplane");
         var result = await Program.TestRunAsync([
-            "dedup-copy", 
-            "--source", xpPath, 
+            "dedup-copy",
+            "--source", xpPath,
             "--destination", mcPath,
-            "--yes", 
+            "--yes",
             "--duplicate-similar", "90"
         ]);
 
@@ -252,29 +251,29 @@ public class IntegrationTests
         {
             Assert.IsFalse(File.GetAttributes(file).HasFlag(FileAttributes.ReparsePoint));
         }
-        
+
         // xp3c not exists because it has worse quality than xp3.
         Assert.IsFalse(resultFiles.Any(f => f.Contains("xp3c")));
-        
+
         var result2 = await Program.TestRunAsync([
-            "dedup-copy", 
-            "--source", xpPath, 
+            "dedup-copy",
+            "--source", xpPath,
             "--destination", mcPath,
-            "--yes", 
+            "--yes",
             "--duplicate-similar", "90"
         ]);
 
         Assert.AreEqual(0, result2.ProgramReturn);
-        
+
         // After run attempt 2, everything should be the same.
         var resultFiles2 = Directory.GetFiles(mcPath, "*", SearchOption.TopDirectoryOnly);
-        
+
         Assert.AreEqual(5, resultFiles2.Length);
         for (var i = 0; i < resultFiles.Length; i++)
         {
             Assert.AreEqual(resultFiles[i], resultFiles2[i]);
         }
-        
+
         // xp3c not exists because it has worse quality than xp3.
         Assert.IsFalse(resultFiles2.Any(f => f.Contains("xp3c")));
     }
