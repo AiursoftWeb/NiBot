@@ -60,7 +60,6 @@ public class FilesHelper(ILogger<FilesHelper> logger, ImageHasher imageHasher)
 
     public static bool IsSymbolicLink(string path)
     {
-        //return new FileInfo(path).Attributes.HasFlag(FileAttributes.ReparsePoint);
         return new FileInfo(path).LinkTarget != null;
     }
 
