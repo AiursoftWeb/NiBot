@@ -192,8 +192,10 @@ public class IntegrationTests
         Assert.AreEqual(2, resultFiles.Length, $"The folder {dedupPath} should contain 2 files.");
 
         // File p1 is actually a link.
-        Assert.IsTrue(File.GetAttributes(resultFiles.First()).HasFlag(FileAttributes.ReparsePoint));
-        Assert.IsFalse(File.GetAttributes(resultFiles.Last()).HasFlag(FileAttributes.ReparsePoint));
+        var firstFileInfo = new FileInfo(resultFiles.First());
+        var lastFileInfo = new FileInfo(resultFiles.Last());
+        Assert.IsNotNull(firstFileInfo.LinkTarget, "The first file should be a symbolic link, but its LinkTarget is null.");
+        Assert.IsNull(lastFileInfo.LinkTarget, "The last file should be a regular file, but it appears to be a link.");
 
         // File p1 point to p2.
         var linkTarget = new FileInfo(resultFiles.First()).ResolveLinkTarget(true);
