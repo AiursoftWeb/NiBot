@@ -13,10 +13,9 @@ public class FilesHelper(ILogger<FilesHelper> logger, ImageHasher imageHasher)
         var relativePathToActualFile = Path.GetRelativePath(virtualFilePathWithoutFileName, actualFile);
         File.CreateSymbolicLink(virtualFile, relativePathToActualFile);
 
-        // Check if the link is created successfully.
         if (File.Exists(virtualFile)
-            && new FileInfo(virtualFile).Attributes.HasFlag(FileAttributes.ReparsePoint)
-            && new FileInfo(virtualFile).ResolveLinkTarget(true)?.FullName == actualFile)
+            && IsSymbolicLink(virtualFile)
+            && new FileInfo(virtualFile).ResolveLinkTarget(true)?.FullName == Path.GetFullPath(actualFile))
         {
             logger.LogInformation("Created a link from {virtualFile} to {actualFile}.", virtualFile, actualFile);
         }
@@ -61,7 +60,8 @@ public class FilesHelper(ILogger<FilesHelper> logger, ImageHasher imageHasher)
 
     public static bool IsSymbolicLink(string path)
     {
-        return new FileInfo(path).Attributes.HasFlag(FileAttributes.ReparsePoint);
+        //return new FileInfo(path).Attributes.HasFlag(FileAttributes.ReparsePoint);
+        return new FileInfo(path).LinkTarget != null;
     }
 
     public void PreviewImage(string path)
