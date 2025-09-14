@@ -28,7 +28,7 @@ public class FilesHelper(ILogger<FilesHelper> logger, ImageHasher imageHasher)
                           $"Relative Actual File: {relativePathToActualFile}." +
                           $"Virtual File Exists: {File.Exists(virtualFile)}, " +
                           $"Virtual File Size: {new FileInfo(virtualFile).Length}, " +
-                          $"Virtual File is a link: {new FileInfo(virtualFile).Attributes.HasFlag(FileAttributes.ReparsePoint)}, " +
+                          $"Virtual File is a link: {IsSymbolicLink(virtualFile)}, " +
                           $"Virtual File Target: {new FileInfo(virtualFile).ResolveLinkTarget(true)?.FullName}.";
             logger.LogError(message);
             throw new Exception(message);
