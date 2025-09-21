@@ -192,14 +192,15 @@ public class IntegrationTests
         Assert.AreEqual(2, resultFiles.Length, $"The folder {dedupPath} should contain 2 files.");
 
         // File p1 is actually a link.
-        var firstFileInfo = new FileInfo(resultFiles.First());
-        var lastFileInfo = new FileInfo(resultFiles.Last());
-        Assert.IsNotNull(firstFileInfo.LinkTarget, "The first file should be a symbolic link, but its LinkTarget is null.");
-        Assert.IsNull(lastFileInfo.LinkTarget, "The last file should be a regular file, but it appears to be a link.");
+        var linkFile = resultFiles.FirstOrDefault(t => new FileInfo(t).LinkTarget is not null);
+        Assert.IsNotNull(linkFile, "The link file should not be null.");
+
+        var actualFile = resultFiles.FirstOrDefault(t => new FileInfo(t).LinkTarget is null);
+        Assert.IsNotNull(actualFile, "The actual file should not be null.");
 
         // File p1 point to p2.
-        var linkTarget = new FileInfo(resultFiles.First()).ResolveLinkTarget(true);
-        Assert.AreEqual(resultFiles.Last(), linkTarget?.FullName);
+        var linkTarget = new FileInfo(linkFile).ResolveLinkTarget(true);
+        Assert.AreEqual(actualFile, linkTarget?.FullName);
 
         // .trash exists.
         var trashFolder = Path.Combine(dedupPath, ".trash");
