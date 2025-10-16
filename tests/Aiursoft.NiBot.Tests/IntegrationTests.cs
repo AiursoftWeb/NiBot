@@ -193,17 +193,17 @@ public class IntegrationTests
 
         // File p1 is actually a link.
         var linkFile = resultFiles.FirstOrDefault(t => new FileInfo(t).LinkTarget is not null);
-        if (linkFile is null)
-        {
-            Assert.Fail("The link file should not be null.");
-        }
         Assert.IsNotNull(linkFile, "The link file should not be null.");
 
         var actualFile = resultFiles.FirstOrDefault(t => new FileInfo(t).LinkTarget is null);
         Assert.IsNotNull(actualFile, "The actual file should not be null.");
 
         // File p1 point to p2.
+
+        // Disable cswarning 8604. This is known not null.
+        #pragma warning disable 8604
         var linkTarget = new FileInfo(linkFile).ResolveLinkTarget(true);
+        #pragma warning restore 8604
         Assert.AreEqual(linkTarget?.FullName, actualFile);
 
         // .trash exists.
