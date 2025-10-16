@@ -199,7 +199,7 @@ public class IntegrationTests
         Assert.IsNotNull(actualFile, "The actual file should not be null.");
 
         // File p1 point to p2.
-        var linkTarget = new FileInfo(linkFile).ResolveLinkTarget(true);
+        var linkTarget = new FileInfo(linkFile)?.ResolveLinkTarget(true);
         Assert.AreEqual(linkTarget?.FullName, actualFile);
 
         // .trash exists.
