@@ -3,6 +3,8 @@ using Aiursoft.CommandFramework.Models;
 using Aiursoft.CSTools.Tools;
 using Aiursoft.NiBot.Dedup;
 
+[assembly: DoNotParallelize]
+
 namespace Aiursoft.NiBot.Tests;
 
 [TestClass]
@@ -39,7 +41,7 @@ public class IntegrationTests
         var result = await Program.TestRunAsync(["--help"]);
 
         Assert.AreEqual(0, result.ProgramReturn);
-        Assert.IsTrue(result.Output.Contains("Options:"));
+        Assert.Contains("Options:", result.Output);
         Assert.IsTrue(string.IsNullOrWhiteSpace(result.Error));
     }
 
@@ -87,7 +89,7 @@ public class IntegrationTests
         var resultFiles = Directory.GetFiles(dedupPath, "*", SearchOption.TopDirectoryOnly);
 
         // Only one file left.
-        Assert.AreEqual(1, resultFiles.Length);
+        Assert.HasCount(1, resultFiles);
 
         // .trash exists.
         var trashFolder = Path.Combine(dedupPath, ".trash");
@@ -97,7 +99,7 @@ public class IntegrationTests
         var trashFiles = Directory.GetFiles(trashFolder, "*", SearchOption.TopDirectoryOnly);
 
         // Two files in trash.
-        Assert.AreEqual(2, trashFiles.Length);
+        Assert.HasCount(2, trashFiles);
 
         // p1.png in trash.
         Assert.AreEqual(Path.Combine(trashFolder, "p1.png"), trashFiles.First(t => t.Contains("png")));
@@ -108,11 +110,10 @@ public class IntegrationTests
 
         // .duplicateReasons.txt contains the reason.
         var duplicateReasons = await File.ReadAllTextAsync(duplicateReasonsFile);
-        Assert.IsTrue(
-            duplicateReasons.Contains(
-                "p1.png is moved here as")); //The file p1.png is moved here as .trash\p1.png because it's a duplicate of p2.png.
-        Assert.IsTrue(duplicateReasons.Contains("because it's a duplicate of"));
-        Assert.IsTrue(duplicateReasons.Contains("p2.png"));
+        Assert.Contains(
+                "p1.png is moved here as", duplicateReasons); //The file p1.png is moved here as .trash\p1.png because it's a duplicate of p2.png.
+        Assert.Contains("because it's a duplicate of", duplicateReasons);
+        Assert.Contains("p2.png", duplicateReasons);
     }
 
     [TestMethod]
@@ -128,7 +129,7 @@ public class IntegrationTests
         var resultFiles = Directory.GetFiles(dedupPath, "*", SearchOption.TopDirectoryOnly);
 
         // Only 3 file left.
-        Assert.AreEqual(3, resultFiles.Length);
+        Assert.HasCount(3, resultFiles);
 
         // .trash exists.
         var trashFolder = Path.Combine(dedupPath, ".trash");
@@ -138,7 +139,7 @@ public class IntegrationTests
         var trashFiles = Directory.GetFiles(trashFolder, "*", SearchOption.TopDirectoryOnly);
 
         // Two files in trash.
-        Assert.AreEqual(2, trashFiles.Length);
+        Assert.HasCount(2, trashFiles);
 
         // p1.png in trash.
         Assert.AreEqual(Path.Combine(trashFolder, "xp3c.png"), trashFiles.First(t => t.Contains("png")));
@@ -149,11 +150,10 @@ public class IntegrationTests
 
         // .duplicateReasons.txt contains the reason.
         var duplicateReasons = await File.ReadAllTextAsync(duplicateReasonsFile);
-        Assert.IsTrue(
-            duplicateReasons.Contains(
-                "xp3c.png is moved here as")); //The file p1.png is moved here as .trash\p1.png because it's a duplicate of p2.png.
-        Assert.IsTrue(duplicateReasons.Contains("because it's a duplicate of"));
-        Assert.IsTrue(duplicateReasons.Contains("xp3.png"));
+        Assert.Contains(
+                "xp3c.png is moved here as", duplicateReasons); //The file p1.png is moved here as .trash\p1.png because it's a duplicate of p2.png.
+        Assert.Contains("because it's a duplicate of", duplicateReasons);
+        Assert.Contains("xp3.png", duplicateReasons);
     }
 
 
@@ -170,7 +170,7 @@ public class IntegrationTests
         var resultFiles = Directory.GetFiles(dedupPath, "*", SearchOption.TopDirectoryOnly);
 
         // Two files left.
-        Assert.AreEqual(2, resultFiles.Length);
+        Assert.HasCount(2, resultFiles);
 
         // .trash not exists.
         var trashFolder = Path.Combine(dedupPath, ".trash");
@@ -189,7 +189,7 @@ public class IntegrationTests
         var resultFiles = Directory.GetFiles(dedupPath, "*", SearchOption.TopDirectoryOnly);
 
         // Two files left
-        Assert.AreEqual(2, resultFiles.Length, $"The folder {dedupPath} should contain 2 files.");
+        Assert.HasCount(2, resultFiles, $"The folder {dedupPath} should contain 2 files.");
 
         // File p1 is actually a link.
         var linkFile = resultFiles.FirstOrDefault(t => new FileInfo(t).LinkTarget is not null);
@@ -199,8 +199,8 @@ public class IntegrationTests
         Assert.IsNotNull(actualFile, "The actual file should not be null.");
 
         // File p1 point to p2.
-        var linkTarget = new FileInfo(linkFile!).ResolveLinkTarget(true);
-        Assert.AreEqual(actualFile!, linkTarget?.FullName);
+        var linkTarget = new FileInfo(linkFile).ResolveLinkTarget(true);
+        Assert.AreEqual(linkTarget?.FullName, actualFile);
 
         // .trash exists.
         var trashFolder = Path.Combine(dedupPath, ".trash");
@@ -210,7 +210,7 @@ public class IntegrationTests
         var trashFiles = Directory.GetFiles(trashFolder, "*", SearchOption.TopDirectoryOnly);
 
         // Two files in trash.
-        Assert.AreEqual(2, trashFiles.Length);
+        Assert.HasCount(2, trashFiles);
 
         // p1.png in trash.
         Assert.AreEqual(Path.Combine(trashFolder, "p1.png"), trashFiles.First(t => t.Contains("png")));
@@ -221,11 +221,10 @@ public class IntegrationTests
 
         // .duplicateReasons.txt contains the reason.
         var duplicateReasons = await File.ReadAllTextAsync(duplicateReasonsFile);
-        Assert.IsTrue(
-            duplicateReasons.Contains(
-                "p1.png is moved here as")); //The file p1.png is moved here as .trash\p1.png because it's a duplicate of p2.png.
-        Assert.IsTrue(duplicateReasons.Contains("because it's a duplicate of"));
-        Assert.IsTrue(duplicateReasons.Contains("p2.png"));
+        Assert.Contains(
+                "p1.png is moved here as", duplicateReasons); //The file p1.png is moved here as .trash\p1.png because it's a duplicate of p2.png.
+        Assert.Contains("because it's a duplicate of", duplicateReasons);
+        Assert.Contains("p2.png", duplicateReasons);
     }
 
     [TestMethod]
@@ -245,7 +244,7 @@ public class IntegrationTests
         var resultFiles = Directory.GetFiles(mcPath, "*", SearchOption.TopDirectoryOnly);
 
         // 5 files left
-        Assert.AreEqual(5, resultFiles.Length, $"The folder {mcPath} should contain 5 files.");
+        Assert.HasCount(5, resultFiles, $"The folder {mcPath} should contain 5 files.");
 
         // All files are real files
         // Assert.IsFalse(File.GetAttributes(resultFiles.First()).HasFlag(FileAttributes.ReparsePoint));
@@ -271,7 +270,7 @@ public class IntegrationTests
         // After run attempt 2, everything should be the same.
         var resultFiles2 = Directory.GetFiles(mcPath, "*", SearchOption.TopDirectoryOnly);
 
-        Assert.AreEqual(5, resultFiles2.Length);
+        Assert.HasCount(5, resultFiles2);
         for (var i = 0; i < resultFiles.Length; i++)
         {
             Assert.AreEqual(resultFiles[i], resultFiles2[i]);
