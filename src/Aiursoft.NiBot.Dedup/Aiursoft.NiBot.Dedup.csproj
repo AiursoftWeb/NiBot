@@ -16,9 +16,9 @@
     <PackageId>Aiursoft.NiBot.Dedup</PackageId>
     <PackageTags>nuget package dotnet csproj dependencies</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://gitlab.aiursoft.cn/aiursoft/nibot</PackageProjectUrl>
+    <PackageProjectUrl>https://gitlab.aiursoft.com/aiursoft/nibot</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://gitlab.aiursoft.cn/aiursoft/nibot.git</RepositoryUrl>
+    <RepositoryUrl>https://gitlab.aiursoft.com/aiursoft/nibot.git</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>

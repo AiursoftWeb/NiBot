@@ -23,9 +23,9 @@
     <PackageId>Aiursoft.NiBot</PackageId>
     <PackageTags>cli nuget dotnet tool image deduplication</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://gitlab.aiursoft.cn/Aiursoft/NiBot</PackageProjectUrl>
+    <PackageProjectUrl>https://gitlab.aiursoft.com/Aiursoft/NiBot</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://gitlab.aiursoft.cn/Aiursoft/NiBot</RepositoryUrl>
+    <RepositoryUrl>https://gitlab.aiursoft.com/Aiursoft/NiBot</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
