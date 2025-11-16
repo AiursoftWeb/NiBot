@@ -16,7 +16,7 @@ However, you discover that a significant portion of these downloaded CG images a
 
 Requirements:
 
-1. [.NET 9 SDK](http://dot.net/)
+1. [.NET 10 SDK](http://dot.net/)
 
 Run the following command to install this tool:
 
@@ -90,7 +90,7 @@ That's it!
 
 Requirements about how to run
 
-1. [.NET 9 SDK](http://dot.net/)
+1. [.NET 10 SDK](http://dot.net/)
 2. Execute `dotnet run` to run the app
 
 ## Run in Microsoft Visual Studio

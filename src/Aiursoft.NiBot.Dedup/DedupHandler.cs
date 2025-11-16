@@ -28,17 +28,17 @@ public class DedupHandler : ExecutableCommandHandlerBuilder
         ];
     }
 
-    protected override async Task Execute(InvocationContext context)
+    protected override async Task Execute(ParseResult context)
     {
-        var verbose = context.ParseResult.GetValueForOption(CommonOptionsProvider.VerboseOption);
-        var path = context.ParseResult.GetValueForOption(Options.PathOptions)!;
-        var similarityBar = context.ParseResult.GetValueForOption(Options.SimilarityBar);
-        var recursive = context.ParseResult.GetValueForOption(Options.RecursiveOption);
-        var keep = context.ParseResult.GetValueForOption(Options.KeepOption);
-        var action = context.ParseResult.GetValueForOption(Options.ActionOption);
-        var yes = context.ParseResult.GetValueForOption(Options.YesOption);
-        var extensions = context.ParseResult.GetValueForOption(Options.ExtensionsOption);
-        var threads = context.ParseResult.GetValueForOption(Options.ThreadsOption);
+        var verbose = context.GetValue(CommonOptionsProvider.VerboseOption);
+        var path = context.GetValue(Options.PathOptions)!;
+        var similarityBar = context.GetValue(Options.SimilarityBar);
+        var recursive = context.GetValue(Options.RecursiveOption);
+        var keep = context.GetValue(Options.KeepOption);
+        var action = context.GetValue(Options.ActionOption);
+        var yes = context.GetValue(Options.YesOption);
+        var extensions = context.GetValue(Options.ExtensionsOption);
+        var threads = context.GetValue(Options.ThreadsOption);
         
         if (!(keep?.Any() ?? false)) throw new ArgumentException("At least one preference should be provided for --keep.");
         if (!(extensions?.Any() ?? false)) throw new ArgumentException("At least one extension should be provided for --extensions.");

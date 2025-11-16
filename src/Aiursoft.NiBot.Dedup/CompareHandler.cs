@@ -29,10 +29,10 @@ public class CompareHandler : ExecutableCommandHandlerBuilder
         ];
     }
 
-    protected override async Task Execute(InvocationContext context)
+    protected override async Task Execute(ParseResult context)
     {
-        var verbose = context.ParseResult.GetValueForOption(CommonOptionsProvider.VerboseOption);
-        var paths = context.ParseResult.GetValueForOption(PathsOptions)!;
+        var verbose = context.GetValue(CommonOptionsProvider.VerboseOption);
+        var paths = context.GetValue(PathsOptions)!;
 
         if (paths.Length < 2)
         {

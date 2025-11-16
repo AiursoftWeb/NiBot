@@ -35,15 +35,15 @@ namespace Aiursoft.NiBot.Dedup
             ];
         }
 
-        protected override async Task Execute(InvocationContext context)
+        protected override async Task Execute(ParseResult context)
         {
-            var verbose = context.ParseResult.GetValueForOption(CommonOptionsProvider.VerboseOption);
-            var sourcePath = context.ParseResult.GetValueForOption(SourceOption)!;
-            var folderPath = context.ParseResult.GetValueForOption(Options.SourcePathOptions)!;
-            var recursive = context.ParseResult.GetValueForOption(Options.RecursiveOption);
-            var top = context.ParseResult.GetValueForOption(TopOption);
-            var extensions = context.ParseResult.GetValueForOption(Options.ExtensionsOption)!;
-            var threads = context.ParseResult.GetValueForOption(Options.ThreadsOption);
+            var verbose = context.GetValue(CommonOptionsProvider.VerboseOption);
+            var sourcePath = context.GetValue(SourceOption)!;
+            var folderPath = context.GetValue(Options.SourcePathOptions)!;
+            var recursive = context.GetValue(Options.RecursiveOption);
+            var top = context.GetValue(TopOption);
+            var extensions = context.GetValue(Options.ExtensionsOption)!;
+            var threads = context.GetValue(Options.ThreadsOption);
 
             var services = ServiceBuilder
                 .CreateCommandHostBuilder<Startup>(verbose)
