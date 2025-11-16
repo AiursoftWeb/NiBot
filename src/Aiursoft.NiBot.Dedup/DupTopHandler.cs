@@ -1,5 +1,4 @@
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using Aiursoft.CommandFramework.Framework;
 using Aiursoft.CommandFramework.Models;
 using Aiursoft.CommandFramework.Services;
@@ -14,14 +13,19 @@ namespace Aiursoft.NiBot.Dedup
         protected override string Description => "Find top similar images in a folder compared to a source image.";
 
         private static readonly Option<string> SourceOption = new(
-                ["--input", "-i"],
-            "Path to the source image for comparison.")
-        { IsRequired = true };
+                name: "--input",
+                aliases: ["-i"])
+        {
+            Description = "Path to the source image for comparison.",
+            Required = true
+        };
 
         private static readonly Option<int> TopOption = new(
-            ["--top"],
-            () => 15,
-            "Number of top similar images to return.");
+            name: "--top")
+        {
+            DefaultValueFactory = _ => 15,
+            Description = "Number of top similar images to return."
+        };
 
         protected override IEnumerable<Option> GetCommandOptions()
         {

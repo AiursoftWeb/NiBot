@@ -1,5 +1,4 @@
 ﻿using System.CommandLine;
-using System.CommandLine.Invocation;
 using Aiursoft.CommandFramework.Framework;
 using Aiursoft.CommandFramework.Models;
 using Aiursoft.CommandFramework.Services;
@@ -15,10 +14,11 @@ public class CompareHandler : ExecutableCommandHandlerBuilder
     protected override string Description => "Compare two images to see their similarity.";
 
     private static readonly Option<string[]> PathsOptions = new(
-        ["--images", "-i"],
-        "Paths of the images to compare. You can pass this '-i' parameter multiple times to compare at least two images.")
+        name: "--images",
+        aliases: ["-i"])
     {
-        IsRequired = true
+        Description = "Paths of the images to compare. You can pass this '-i' parameter multiple times to compare at least two images.",
+        Required = true
     };
 
     protected override IEnumerable<Option> GetCommandOptions()

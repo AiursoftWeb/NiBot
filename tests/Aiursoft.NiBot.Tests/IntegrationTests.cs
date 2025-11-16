@@ -41,8 +41,8 @@ public class IntegrationTests
         var result = await Program.TestRunAsync(["--help"]);
 
         Assert.AreEqual(0, result.ProgramReturn);
-        Assert.Contains("Options:", result.Output);
-        Assert.IsTrue(string.IsNullOrWhiteSpace(result.Error));
+        Assert.Contains("Options:", result.StdOut);
+        Assert.IsTrue(string.IsNullOrWhiteSpace(result.StdErr));
     }
 
     [TestMethod]
