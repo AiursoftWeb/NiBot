@@ -1,5 +1,4 @@
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using Aiursoft.CommandFramework.Framework;
 using Aiursoft.CommandFramework.Models;
 using Aiursoft.CommandFramework.Services;
@@ -27,7 +26,7 @@ public class DedupCopyHandler : ExecutableCommandHandlerBuilder
             Options.ThreadsOption
         ];
     }
-    
+
     protected override async Task Execute(ParseResult context)
     {
         var verbose = context.GetValue(CommonOptionsProvider.VerboseOption);
@@ -39,15 +38,15 @@ public class DedupCopyHandler : ExecutableCommandHandlerBuilder
         var yes = context.GetValue(Options.YesOption);
         var extensions = context.GetValue(Options.ExtensionsOption);
         var threads = context.GetValue(Options.ThreadsOption);
-        
+
         if (!(keep?.Any() ?? false)) throw new ArgumentException("At least one preference should be provided for --keep.");
         if (!(extensions?.Any() ?? false)) throw new ArgumentException("At least one extension should be provided for --extensions.");
-        
+
         var services = ServiceBuilder
             .CreateCommandHostBuilder<Startup>(verbose)
             .Build()
             .Services;
-        
+
         var dedupEngine = services.GetRequiredService<DedupEngine>();
 
         var absoluteSourcePath = Path.IsPathRooted(sourcePath)

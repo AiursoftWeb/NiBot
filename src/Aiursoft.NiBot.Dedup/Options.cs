@@ -1,6 +1,5 @@
 using System.CommandLine;
 using Aiursoft.NiBot.Core.Models;
-using System;
 
 namespace Aiursoft.NiBot.Dedup;
 
