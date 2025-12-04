@@ -4,7 +4,7 @@
 [![Pipeline stat](https://gitlab.aiursoft.com/aiursoft/NiBot/badges/master/pipeline.svg)](https://gitlab.aiursoft.com/aiursoft/NiBot/-/pipelines)
 [![Test Coverage](https://gitlab.aiursoft.com/aiursoft/NiBot/badges/master/coverage.svg)](https://gitlab.aiursoft.com/aiursoft/NiBot/-/pipelines)
 [![NuGet version](https://img.shields.io/nuget/v/Aiursoft.NiBot.svg)](https://www.nuget.org/packages/Aiursoft.NiBot/)
-[![ManHours](https://manhours.aiursoft.com/r/gitlab.aiursoft.com/aiursoft/nibot.svg)](https://gitlab.aiursoft.com/aiursoft/nibot/-/commits/master?ref_type=heads)
+[![Man hours](https://manhours.aiursoft.com/r/gitlab.aiursoft.com/aiursoft/nibot.svg)](https://manhours.aiursoft.com/r/gitlab.aiursoft.com/aiursoft/nibot.html)
 
 A cli tool helps you to de-duplicate images in a folder.
 
