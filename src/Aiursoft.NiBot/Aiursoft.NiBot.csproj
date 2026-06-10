@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <Version>10.0.12</Version>
+  <PropertyGroup><OutputType>Exe</OutputType>
+    <Version>10.0.13</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>nibot</AssemblyName>
     <RootNamespace>Aiursoft.NiBot</RootNamespace>
@@ -26,8 +25,7 @@
     <PackageProjectUrl>https://gitlab.aiursoft.com/Aiursoft/NiBot</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://gitlab.aiursoft.com/Aiursoft/NiBot</RepositoryUrl>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-  </PropertyGroup>
+    <PackageReadmeFile>README.md</PackageReadmeFile></PropertyGroup>
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="." />
     <ProjectReference Include="..\Aiursoft.NiBot.Dedup\Aiursoft.NiBot.Dedup.csproj" />
