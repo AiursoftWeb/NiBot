@@ -8,6 +8,15 @@
 
 A cli tool helps you to de-duplicate images in a folder.
 
+NiBot also supports **incremental archiving into existing category folders**:
+`archive` compares an incoming image folder against an existing library, skips exact
+duplicates, and uses local CLIP image embeddings to recommend categories for new images.
+Use `--classification nearest` to choose the closest existing category, or retain the
+strict default for uncertain matches. Model installation uses the .NET `archive-model`
+command with SHA-256 verification; no Python setup is required.
+It produces a JSON plan and an HTML preview; `archive-apply` copies approved items without
+overwriting old files. See [incremental archive setup and usage](docs/archive.md).
+
 Suppose you enjoy collecting images and intensively gather a large number of them from various websites to your hard drive every day. Soon, your hard drive accumulates tens of thousands of CG images with different sources and resolutions.
 
 However, you discover that a significant portion of these downloaded CG images are duplicates, occupying precious disk space. Therefore, you urgently need a fast method to identify and remove duplicates from your CG directory. Since the sources of these downloads vary, traditional methods such as searching by file names are clearly inadequate for solving this problem; it's necessary to analyze the content of the images.
