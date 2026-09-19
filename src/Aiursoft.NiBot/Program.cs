@@ -9,5 +9,7 @@ return await new NestedCommandApp()
     .WithFeature(new DedupPatchHandler()) // Dedup patch handler will only copy duplicate and better quality images from source to destination.
     .WithFeature(new CompareHandler())
     .WithFeature(new DupTopHandler())
+    .WithFeature(new ArchiveModelHandler())
+    .WithFeature(new ArchiveHandler())
+    .WithFeature(new ArchiveApplyHandler())
     .RunAsync(args);
-

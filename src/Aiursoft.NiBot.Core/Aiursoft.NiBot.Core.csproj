@@ -25,6 +25,7 @@
     <PackageReference Include="Aiursoft.Canon" Version="10.0.13" />
     <PackageReference Include="Aiursoft.CommandFramework.ProgressBar" Version="10.0.0" />
     <PackageReference Include="CoenM.ImageSharp.ImageHash" Version="1.3.6" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
     <None Include="../../README.md" Pack="true" PackagePath="." />
   </ItemGroup>
 </Project>
