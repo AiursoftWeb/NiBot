@@ -1,17 +1,29 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <Version>10.0.3</Version>
     <TargetFramework>net10.0</TargetFramework>
-    <Version>10.0.2</Version>
+    <AssemblyName>Aiursoft.NiBot.Archive</AssemblyName>
+    <RootNamespace>Aiursoft.NiBot.Archive</RootNamespace>
+    <IsTestProject>false</IsTestProject>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <IsPackable>true</IsPackable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <IsPackable>true</IsPackable>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <Company>Aiursoft</Company>
+    <Product>Archive</Product>
     <Description>Incremental image archiving into existing visual categories.</Description>
+    <PackageId>Aiursoft.NiBot.Archive</PackageId>
+    <PackageTags>nuget package dotnet csproj dependencies</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://gitlab.aiursoft.com/aiursoft/nibot</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://gitlab.aiursoft.com/aiursoft/nibot.git</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="." />
     <ProjectReference Include="../Aiursoft.NiBot.Core/Aiursoft.NiBot.Core.csproj" />
-    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.29.0" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.31.0" />
   </ItemGroup>
 </Project>
