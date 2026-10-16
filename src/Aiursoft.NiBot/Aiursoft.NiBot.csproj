@@ -33,4 +33,9 @@
     <None Include="../../LICENSE" Pack="true" PackagePath="." />
     <ProjectReference Include="..\Aiursoft.NiBot.Dedup\Aiursoft.NiBot.Dedup.csproj" />
   </ItemGroup>
+  <Target Name="ExcludeToolDebugSymbols" AfterTargets="ComputeFilesToPublish">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Extension)' == '.pdb'" />
+    </ItemGroup>
+  </Target>
 </Project>
