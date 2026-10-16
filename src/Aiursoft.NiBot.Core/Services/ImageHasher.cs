@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using Aiursoft.Canon;
 using Aiursoft.CommandFramework.ProgressBar;
 using Aiursoft.NiBot.Core.Models;
-using CoenM.ImageHash.HashAlgorithms;
+using Aiursoft.NiBot.Core.Util;
 using Microsoft.Extensions.Logging;
 
 namespace Aiursoft.NiBot.Core.Services;

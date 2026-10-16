@@ -48,12 +48,16 @@ license. The existing default model family is CLIP ViT-L/14; other compatible 22
 vision encoders must use their own feature cache identity.
 
 NiBot resizes the shortest side to 224 with bicubic sampling, center-crops, converts to
-normalized channel-first RGB and normalizes the output vector. It uses ImageSharp for
+normalized channel-first RGB and normalizes the output vector. It uses SkiaSharp for
 preprocessing, so existing PIL/Transformers `.npz` vectors are **not directly imported**.
 The old cache also lacks content checksums and a reliable preprocessing/version identity.
 NiBot instead computes a new content-addressed cache for both reference and incoming images.
 Cache keys include the model file SHA-256 and preprocessing version; changed images or
-models cannot silently reuse incompatible entries. Existing `.npz` files are untouched.
+models cannot silently reuse incompatible entries. The SkiaSharp preprocessing identity
+also invalidates caches generated with the former ImageSharp backend. Existing `.npz`
+files are untouched. pHash values are recomputed from source images rather than reused
+across backends; resampling differences can change similarity scores, so inspect a new
+preview before applying an existing threshold to a large library.
 
 ## Generate a preview
 

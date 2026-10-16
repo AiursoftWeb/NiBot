@@ -1,9 +1,6 @@
 using System.Numerics;
 using Aiursoft.NiBot.Core.Services;
 using Aiursoft.NiBot.Core.Util;
-using CoenM.ImageHash;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace Aiursoft.NiBot.Core.Models;
 
@@ -40,20 +37,20 @@ public class MappedImage
         _isGrayscale = new Lazy<bool>(() =>
         {
             // Load the image to get the resolution.
-            using var img = Image.Load<Rgba32>(PhysicalPath);
+            using var img = ImageDecoder.Load(PhysicalPath);
             // Load the image to check if it's colored or white/black.
             return GrayscaleChecker.IsImageGrayscale(img, Resolution);
         });
     }
 
-    public static Task<MappedImage> CreateAsync(string path, IImageHash hashAlgo)
+    public static Task<MappedImage> CreateAsync(string path, PerceptualHash hashAlgo)
     {
         return Task.Run(() =>
         {
             var physicalPath = FilesHelper.GetActualFilePath(path);
-            using var img = Image.Load<Rgba32>(physicalPath);
-            var resolution = img.Width * img.Height; // The image will be modified when hashing
-            var hash = hashAlgo.Hash(img);
+            using var img = ImageDecoder.Load(physicalPath, out var origin);
+            var resolution = img.Width * img.Height;
+            var hash = hashAlgo.Hash(img, origin);
             return new MappedImage(physicalPath, hash, resolution);
         });
     }
