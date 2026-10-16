@@ -82,7 +82,7 @@ public class IntegrationTests
         var dedupPath = Path.Combine(_tempAssetsFolder, "mc");
         var result =
             await Program.TestRunAsync([
-                "dedup", "--path", dedupPath, "--yes", "--duplicate-similar", "90"
+                "dedup", "--path", dedupPath, "--yes"
             ]); // P2 quality is better. P1 and P2 similarity is 96.88%
 
         Assert.AreEqual(0, result.ProgramReturn);

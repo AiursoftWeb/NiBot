@@ -1,9 +1,9 @@
 using Aiursoft.CommandFramework;
 using Aiursoft.NiBot.Archive;
 using Aiursoft.NiBot.Dedup;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+using Aiursoft.NiBot.Core.Models;
+using Aiursoft.NiBot.Core.Util;
+using SkiaSharp;
 
 namespace Aiursoft.NiBot.Tests;
 
@@ -30,17 +30,36 @@ public sealed class ArchiveTests
     private static void Photo(string path, int seed, bool blue = false)
     {
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-        using var image = new Image<Rgb24>(64, 80);
+        using var image = new SKBitmap(64, 80);
         var random = new Random(seed);
         for (var y = 0; y < image.Height; y++)
         for (var x = 0; x < image.Width; x++)
         {
             var strong = (byte)random.Next(160, 256);
             var weak = (byte)random.Next(0, 90);
-            image[x, y] = blue ? new Rgb24(weak, (byte)random.Next(0, 90), strong) : new Rgb24(strong, (byte)random.Next(0, 90), weak);
+            image.SetPixel(x, y, blue ? new SKColor(weak, (byte)random.Next(0, 90), strong) : new SKColor(strong, (byte)random.Next(0, 90), weak));
         }
-        if (Path.GetExtension(path).Equals(".webp", StringComparison.OrdinalIgnoreCase)) image.SaveAsWebp(path);
-        else image.SaveAsPng(path);
+        Save(image, path, Path.GetExtension(path).Equals(".webp", StringComparison.OrdinalIgnoreCase)
+            ? SKEncodedImageFormat.Webp : SKEncodedImageFormat.Png);
+    }
+
+
+    private static void Save(SKBitmap bitmap, string path, SKEncodedImageFormat format = SKEncodedImageFormat.Png)
+    {
+        using var image = SKImage.FromBitmap(bitmap);
+        using var data = image.Encode(format, 100);
+        using var stream = File.Create(path);
+        data.SaveTo(stream);
+    }
+
+    private static void Reencode(string source, string destination)
+    {
+        using var image = ImageDecoder.Load(source);
+        using var pixels = image.PeekPixels();
+        using var data = pixels.Encode(new SKPngEncoderOptions(SKPngEncoderFilterFlags.None, 0))
+            ?? throw new InvalidDataException("Failed to encode test image.");
+        using var stream = File.Create(destination);
+        data.SaveTo(stream);
     }
 
     private void References()
@@ -115,12 +134,7 @@ public sealed class ArchiveTests
     {
         References();
         var original = Path.Combine(Destination, "red", "red0.png");
-        using (var image = Image.Load<Rgb24>(original))
-        {
-            image.Metadata.ExifProfile = new SixLabors.ImageSharp.Metadata.Profiles.Exif.ExifProfile();
-            image.Metadata.ExifProfile.SetValue(SixLabors.ImageSharp.Metadata.Profiles.Exif.ExifTag.Software, "new encoder");
-            image.SaveAsPng(Path.Combine(Source, "reencoded.png"));
-        }
+        Reencode(original, Path.Combine(Source, "reencoded.png"));
         Assert.AreNotEqual(ArchiveFiles.Hash(original), ArchiveFiles.Hash(Path.Combine(Source, "reencoded.png")));
         Assert.AreEqual(ArchiveDecision.ReviewDuplicate, Plan().Items.Single().Decision);
         Assert.AreEqual(ArchiveDecision.Duplicate, Plan(new ArchiveSettings { SkipSimilar = true, DuplicateSimilarity = 100 }).Items.Single().Decision);
@@ -144,12 +158,7 @@ public sealed class ArchiveTests
         var source = Path.Combine(Source, "new.png");
         Photo(source, 99);
         var plan = Plan();
-        using (var image = Image.Load<Rgb24>(source))
-        {
-            image.Metadata.ExifProfile = new SixLabors.ImageSharp.Metadata.Profiles.Exif.ExifProfile();
-            image.Metadata.ExifProfile.SetValue(SixLabors.ImageSharp.Metadata.Profiles.Exif.ExifTag.Software, "arrived later");
-            image.SaveAsPng(Path.Combine(Destination, "red", "arrived.png"));
-        }
+        Reencode(source, Path.Combine(Destination, "red", "arrived.png"));
         Assert.AreEqual("ReviewDuplicate", new ArchiveExecutor().Apply(plan).Single().Status);
         Assert.IsFalse(File.Exists(Path.Combine(Destination, "red", "new.png")));
     }
@@ -251,7 +260,7 @@ public sealed class ArchiveTests
         File.WriteAllText(Path.Combine(Source, "broken.jpg"), "not an image");
         Assert.AreEqual(ArchiveDecision.Error, Plan().Items.Single().Decision);
         File.WriteAllText(Path.Combine(Destination, "red", "broken.jpg"), "not an image");
-        Assert.Throws<UnknownImageFormatException>(() => Plan());
+        Assert.Throws<InvalidDataException>(() => Plan());
     }
 
     [TestMethod]
@@ -270,7 +279,11 @@ public sealed class ArchiveTests
     public void OnnxProviderExecutesRealGraphWithNormalizedRgbInput()
     {
         var path = Path.Combine(Source, "white.png");
-        using (var white = new Image<Rgb24>(240, 300, new Rgb24(255, 255, 255))) white.SaveAsPng(path);
+        using (var white = new SKBitmap(240, 300))
+        {
+            white.Erase(SKColors.White);
+            Save(white, path);
+        }
         using var provider = new OnnxClipEmbeddingProvider(Model, 1);
         var actual = provider.Embed(path);
         var expected = CategoryMatcher.Normalize([(1 - 0.48145466f) / 0.26862954f, (1 - 0.4578275f) / 0.26130258f, (1 - 0.40821073f) / 0.27577711f]);
@@ -329,14 +342,15 @@ public sealed class ArchiveTests
     public void VisualDuplicateHintsCatchCenterCropsButRejectDifferentStructure()
     {
         var original = Path.Combine(Source, "original.png");
-        using (var image = new Image<Rgb24>(100, 140))
+        using (var image = new SKBitmap(100, 140))
         {
             for (var y = 0; y < image.Height; y++)
             for (var x = 0; x < image.Width; x++)
-                image[x, y] = new Rgb24((byte)(x * 2), (byte)((y * 3 + x * x) % 256), (byte)(y % 256));
-            image.SaveAsPng(original);
-            image.Mutate(c => c.Crop(new Rectangle(0, 20, 100, 100)));
-            image.SaveAsJpeg(Path.Combine(Source, "crop.jpg"));
+                image.SetPixel(x, y, new SKColor((byte)(x * 2), (byte)((y * 3 + x * x) % 256), (byte)(y % 256)));
+            Save(image, original);
+            using var crop = new SKBitmap();
+            Assert.IsTrue(image.ExtractSubset(crop, new SKRectI(0, 20, 100, 120)));
+            Save(crop, Path.Combine(Source, "crop.jpg"), SKEncodedImageFormat.Jpeg);
         }
         Photo(Path.Combine(Source, "different.png"), 912);
         var detector = new VisualDuplicateDetector();
@@ -364,6 +378,77 @@ public sealed class ArchiveTests
             ["archive-model", "--source", Model, "--sha256", ArchiveFiles.Hash(Model), "--destination", target]);
         Assert.AreEqual(0, result.ProgramReturn, result.StdErr + result.StdOut);
         Assert.AreEqual(ArchiveFiles.Hash(Model), ArchiveFiles.Hash(target));
+    }
+
+    [TestMethod]
+    public void PreprocessingPreservesRgbChannelsBeforeResizingAndIgnoresAlpha()
+    {
+        var path = Path.Combine(Source, "transparent.png");
+        using (var bitmap = new SKBitmap(new SKImageInfo(240, 300, SKColorType.Rgba8888, SKAlphaType.Unpremul)))
+        {
+            bitmap.Erase(new SKColor(200, 80, 40, 128));
+            using var pixels = bitmap.PeekPixels();
+            using var encoded = pixels.Encode(SKPngEncoderOptions.Default)
+                ?? throw new InvalidDataException("Failed to encode test image.");
+            using var file = File.Create(path);
+            encoded.SaveTo(file);
+        }
+        var input = OnnxClipEmbeddingProvider.Preprocess(path);
+        var plane = OnnxClipEmbeddingProvider.ImageSize * OnnxClipEmbeddingProvider.ImageSize;
+        float[] expected = [(200 / 255f - 0.48145466f) / 0.26862954f,
+            (80 / 255f - 0.4578275f) / 0.26130258f, (40 / 255f - 0.40821073f) / 0.27577711f];
+        for (var channel = 0; channel < 3; channel++)
+        for (var index = 0; index < plane; index++)
+            Assert.AreEqual(expected[channel], input[channel * plane + index], 0.02f);
+    }
+
+    [TestMethod]
+    public void PerceptualHashRespectsExifRotationWithoutChangingInput()
+    {
+        using var bitmap = new SKBitmap(64, 64);
+        using var rotated = new SKBitmap(64, 64);
+        var random = new Random(450);
+        for (var y = 0; y < 64; y++)
+        for (var x = 0; x < 64; x++)
+        {
+            var color = new SKColor((byte)random.Next(256), (byte)random.Next(256), (byte)random.Next(256));
+            bitmap.SetPixel(x, y, color);
+            rotated.SetPixel(63 - y, x, color);
+        }
+        var hash = new PerceptualHash();
+        Assert.AreEqual(hash.Hash(rotated), hash.Hash(bitmap, SKEncodedOrigin.RightTop));
+        Assert.AreEqual(64, bitmap.Width);
+        Assert.AreNotEqual(hash.Hash(bitmap), hash.Hash(rotated));
+    }
+
+    [TestMethod]
+    public async Task EncodedExifIsUsedForHashingButNotClipPreprocessing()
+    {
+        var path = Path.Combine(Source, "raw.jpg");
+        var orientedPath = Path.Combine(Source, "oriented.jpg");
+        using (var bitmap = new SKBitmap(64, 80))
+        {
+            for (var y = 0; y < bitmap.Height; y++)
+            for (var x = 0; x < bitmap.Width; x++)
+                bitmap.SetPixel(x, y, new SKColor((byte)(x * 3), (byte)(y * 2), (byte)((x * y) % 256)));
+            Save(bitmap, path, SKEncodedImageFormat.Jpeg);
+        }
+        // JPEG APP1: little-endian TIFF with EXIF orientation 6 (90 degrees clockwise).
+        byte[] exif = [0xff, 0xe1, 0, 0x22, 0x45, 0x78, 0x69, 0x66, 0, 0,
+            0x49, 0x49, 0x2a, 0, 8, 0, 0, 0, 1, 0, 0x12, 1, 3, 0, 1, 0, 0, 0,
+            6, 0, 0, 0, 0, 0, 0, 0];
+        var jpeg = File.ReadAllBytes(path);
+        File.WriteAllBytes(orientedPath, [..jpeg[..2], ..exif, ..jpeg[2..]]);
+        using var decoded = ImageDecoder.Load(orientedPath, out var origin);
+        Assert.AreEqual(SKEncodedOrigin.RightTop, origin);
+        Assert.AreEqual(64, decoded.Width);
+        Assert.AreEqual(80, decoded.Height);
+        var algorithm = new PerceptualHash();
+        var mapped = await MappedImage.CreateAsync(orientedPath, algorithm);
+        Assert.AreEqual(64 * 80, mapped.Resolution);
+        Assert.AreEqual(algorithm.Hash(decoded, origin), mapped.Hash);
+        Assert.AreEqual(mapped.Hash, ArchiveFiles.Index(Source, orientedPath, new ArchiveSettings()).PerceptualHash);
+        CollectionAssert.AreEqual(OnnxClipEmbeddingProvider.Preprocess(path), OnnxClipEmbeddingProvider.Preprocess(orientedPath));
     }
 
     private sealed class FakeProvider(string fingerprint = "test-model") : IImageEmbeddingProvider

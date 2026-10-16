@@ -1,8 +1,7 @@
 using Microsoft.ML.OnnxRuntime;
 using System.Security.Cryptography;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+using Aiursoft.NiBot.Core.Util;
+using SkiaSharp;
 
 namespace Aiursoft.NiBot.Archive;
 
@@ -22,7 +21,7 @@ public sealed class OnnxClipEmbeddingProvider : IImageEmbeddingProvider
         // Self-contained ONNX only: all model weights participate in cache invalidation.
         // Load from bytes so external tensor files cannot be resolved using a model file path.
         var modelBytes = File.ReadAllBytes(modelPath);
-        Fingerprint = $"clip-rgb-bicubic-center224-v1-imagesharp-{typeof(Image).Assembly.GetName().Version}:" + Convert.ToHexStringLower(SHA256.HashData(modelBytes));
+        Fingerprint = $"clip-rgb-bicubic-center224-v2-skia-{typeof(SKBitmap).Assembly.GetName().Version}:" + Convert.ToHexStringLower(SHA256.HashData(modelBytes));
         using var options = new SessionOptions();
         options.IntraOpNumThreads = threads;
         options.InterOpNumThreads = 1;
@@ -49,14 +48,15 @@ public sealed class OnnxClipEmbeddingProvider : IImageEmbeddingProvider
 
     public static float[] Preprocess(string path)
     {
-        using var image = Image.Load<Rgb24>(path);
+        using var original = ImageDecoder.LoadRgb(path);
         // Match the original CLIP pipeline: RGB, shortest side -> 224, center crop,
         // channel-first float RGB and the model's mean/std. No EXIF auto-rotation.
-        var scale = ImageSize / (double)Math.Min(image.Width, image.Height);
-        var width = Math.Max(ImageSize, (int)(image.Width * scale));
-        var height = Math.Max(ImageSize, (int)(image.Height * scale));
-        image.Mutate(context => context.Resize(width, height, KnownResamplers.Bicubic)
-            .Crop(new Rectangle((width - ImageSize) / 2, (height - ImageSize) / 2, ImageSize, ImageSize)));
+        var scale = ImageSize / (double)Math.Min(original.Width, original.Height);
+        var width = Math.Max(ImageSize, (int)(original.Width * scale));
+        var height = Math.Max(ImageSize, (int)(original.Height * scale));
+        using var resized = ImageDecoder.Resize(original, width, height);
+        var left = (width - ImageSize) / 2;
+        var top = (height - ImageSize) / 2;
         float[] mean = [0.48145466f, 0.4578275f, 0.40821073f];
         float[] std = [0.26862954f, 0.26130258f, 0.27577711f];
         var plane = ImageSize * ImageSize;
@@ -64,11 +64,11 @@ public sealed class OnnxClipEmbeddingProvider : IImageEmbeddingProvider
         for (var y = 0; y < ImageSize; y++)
         for (var x = 0; x < ImageSize; x++)
         {
-            var pixel = image[x, y];
+            var pixel = resized.GetPixel(left + x, top + y);
             var i = y * ImageSize + x;
-            pixels[i] = (pixel.R / 255f - mean[0]) / std[0];
-            pixels[plane + i] = (pixel.G / 255f - mean[1]) / std[1];
-            pixels[2 * plane + i] = (pixel.B / 255f - mean[2]) / std[2];
+            pixels[i] = (pixel.Red / 255f - mean[0]) / std[0];
+            pixels[plane + i] = (pixel.Green / 255f - mean[1]) / std[1];
+            pixels[2 * plane + i] = (pixel.Blue / 255f - mean[2]) / std[2];
         }
         return pixels;
     }

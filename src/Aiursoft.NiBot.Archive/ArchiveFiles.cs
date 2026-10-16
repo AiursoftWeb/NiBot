@@ -1,8 +1,6 @@
 using System.Security.Cryptography;
 using System.Text.Json;
-using CoenM.ImageHash.HashAlgorithms;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using Aiursoft.NiBot.Core.Util;
 
 namespace Aiursoft.NiBot.Archive;
 
@@ -85,8 +83,8 @@ public static class ArchiveFiles
         AssertNoLinks(path);
         var bytes = File.ReadAllBytes(path);
         var hash = Convert.ToHexStringLower(SHA256.HashData(bytes));
-        using var image = Image.Load<Rgba32>(bytes);
-        var perceptual = new PerceptualHash().Hash(image);
+        using var image = ImageDecoder.Load(bytes, out var origin);
+        var perceptual = new PerceptualHash().Hash(image, origin);
         var relative = Path.GetRelativePath(root, path);
         var parts = relative.Split(Path.DirectorySeparatorChar);
         var category = parts.Length > 1 && !settings.ExcludedCategories.Contains(parts[0], StringComparer.OrdinalIgnoreCase)

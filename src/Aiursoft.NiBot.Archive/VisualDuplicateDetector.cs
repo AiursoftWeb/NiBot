@@ -1,6 +1,5 @@
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
+using Aiursoft.NiBot.Core.Util;
+using SkiaSharp;
 
 namespace Aiursoft.NiBot.Archive;
 
@@ -19,25 +18,24 @@ public sealed class VisualDuplicateDetector
     private float[][] Get(string path)
     {
         if (_signatures.TryGetValue(path, out var cached)) return cached;
-        using var original = Image.Load<Rgb24>(path);
-        using var square = original.Clone();
-        var size = Math.Min(square.Width, square.Height);
-        var bounds = new Rectangle((square.Width - size) / 2, (square.Height - size) / 2, size, size);
-        square.Mutate(c => c.Crop(bounds));
-        var result = new[] { Signature(original), Signature(square) };
+        using var original = ImageDecoder.LoadRgb(path);
+        var size = Math.Min(original.Width, original.Height);
+        var left = (original.Width - size) / 2;
+        var top = (original.Height - size) / 2;
+        var result = new[] { Signature(original), Signature(original, new SKRect(left, top, left + size, top + size)) };
         _signatures.Add(path, result);
         return result;
     }
 
-    private static float[] Signature(Image<Rgb24> image)
+    private static float[] Signature(SKBitmap source, SKRect? bounds = null)
     {
-        image.Mutate(c => c.Resize(64, 64, KnownResamplers.Bicubic));
+        using var image = ImageDecoder.Resize(source, 64, 64, bounds);
         var result = new float[64 * 64];
         for (var y = 0; y < 64; y++)
         for (var x = 0; x < 64; x++)
         {
-            var p = image[x, y];
-            result[y * 64 + x] = (0.299f * p.R + 0.587f * p.G + 0.114f * p.B) / 255;
+            var p = image.GetPixel(x, y);
+            result[y * 64 + x] = (0.299f * p.Red + 0.587f * p.Green + 0.114f * p.Blue) / 255;
         }
         return result;
     }
