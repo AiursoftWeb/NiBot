@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <Version>10.0.16</Version>
+    <Version>10.0.17</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>Aiursoft.NiBot.Core</AssemblyName>
     <RootNamespace>Aiursoft.NiBot.Core</RootNamespace>
@@ -16,9 +16,9 @@
     <PackageId>Aiursoft.NiBot.Core</PackageId>
     <PackageTags>nuget package dotnet csproj dependencies dedup image-processing</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://gitlab.aiursoft.com/aiursoft/nibot</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/AiursoftWeb/nibot</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://gitlab.aiursoft.com/aiursoft/nibot.git</RepositoryUrl>
+    <RepositoryUrl>https://github.com/AiursoftWeb/nibot.git</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
