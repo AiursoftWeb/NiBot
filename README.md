@@ -3,6 +3,7 @@
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/AiursoftWeb/nibot/blob/master/LICENSE)
 [![Pipeline stat](https://gitlab.aiursoft.com/aiursoft/NiBot/badges/master/pipeline.svg)](https://gitlab.aiursoft.com/aiursoft/NiBot/-/pipelines)
 [![Test Coverage](https://gitlab.aiursoft.com/aiursoft/NiBot/badges/master/coverage.svg)](https://gitlab.aiursoft.com/aiursoft/NiBot/-/pipelines)
+[![S360 compliance](https://s360.aiursoft.com/badge.svg?project=aiursoft%2Fnibot)](https://s360.aiursoft.com/SupplyChain?tab=projects&project=aiursoft%2Fnibot&scope=baseline&ecosystem=all)
 [![NuGet version](https://img.shields.io/nuget/v/Aiursoft.NiBot.svg)](https://www.nuget.org/packages/Aiursoft.NiBot/)
 [![Man hours](https://manhours.aiursoft.com/r/github.com/aiursoftweb/nibot.svg)](https://manhours.aiursoft.com/r/github.com/aiursoftweb/nibot.html)
 
