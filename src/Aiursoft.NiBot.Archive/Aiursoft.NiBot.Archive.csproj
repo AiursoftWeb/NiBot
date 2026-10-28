@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <Version>10.0.8</Version>
+    <Version>10.0.9</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>Aiursoft.NiBot.Archive</AssemblyName>
     <RootNamespace>Aiursoft.NiBot.Archive</RootNamespace>
@@ -24,6 +24,6 @@
   <ItemGroup>
     <None Include="../../README.md" Pack="true" PackagePath="." />
     <ProjectReference Include="../Aiursoft.NiBot.Core/Aiursoft.NiBot.Core.csproj" />
-    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.31.0" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.31.1" />
   </ItemGroup>
 </Project>
