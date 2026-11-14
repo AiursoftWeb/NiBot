@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <Version>10.0.32</Version>
+    <Version>10.0.33</Version>
     <TargetFramework>net10.0</TargetFramework>
     <AssemblyName>nibot</AssemblyName>
     <RootNamespace>Aiursoft.NiBot</RootNamespace>
@@ -34,9 +34,14 @@
     <None Include="../../THIRD-PARTY-NOTICES" Pack="true" PackagePath="." />
     <ProjectReference Include="..\Aiursoft.NiBot.Dedup\Aiursoft.NiBot.Dedup.csproj" />
   </ItemGroup>
-  <Target Name="ExcludeToolDebugSymbols" AfterTargets="ComputeFilesToPublish">
+  <Target Name="ExcludeToolDevelopmentAssets" AfterTargets="ComputeFilesToPublish">
     <ItemGroup>
-      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="'%(ResolvedFileToPublish.Extension)' == '.pdb'"></ResolvedFileToPublish>
+      <!-- Keep runtime binaries; symbols, link libraries, and mobile SDK archives are not used by this CLI. -->
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
+        Condition="'%(ResolvedFileToPublish.Extension)' == '.pdb'
+          Or '%(ResolvedFileToPublish.Extension)' == '.lib'
+          Or '%(ResolvedFileToPublish.Extension)' == '.aar'
+          Or '%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)' == 'onnxruntime.xcframework.zip'" />
     </ItemGroup>
   </Target>
 </Project>
