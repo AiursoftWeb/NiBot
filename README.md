@@ -1,5 +1,6 @@
-# NiBot
+# Aiursoft NiBot
 
+<a name="nibot"></a>
 [![MIT licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/AiursoftWeb/nibot/blob/master/LICENSE)
 [![Pipeline stat](https://badge-proxy.aiursoft.com/aiursoft/NiBot/badges/master/pipeline.svg)](https://gitlab.aiursoft.com/aiursoft/NiBot/-/pipelines)
 [![Test Coverage](https://badge-proxy.aiursoft.com/aiursoft/NiBot/badges/master/coverage.svg)](https://gitlab.aiursoft.com/aiursoft/NiBot/-/pipelines)
@@ -8,6 +9,12 @@
 [![Man hours](https://manhours.aiursoft.com/r/github.com/aiursoftweb/nibot.svg)](https://manhours.aiursoft.com/r/github.com/aiursoftweb/nibot.html)
 
 A cli tool helps you to de-duplicate images in a folder.
+
+## Overview
+
+### What is NiBot?
+
+Compare and de-duplicate local images, or plan and apply incremental image archiving with optional local CLIP models.
 
 NiBot also supports **incremental archiving into existing category folders**:
 `archive` compares an incoming image folder against an existing library, skips exact
@@ -24,17 +31,31 @@ However, you discover that a significant portion of these downloaded CG images a
 
 ## Installation
 
-Requirements:
-
-1. [.NET 10 SDK](http://dot.net/)
-
-Run the following command to install this tool:
+Install the CLI with the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0):
 
 ```bash
 dotnet tool install --global Aiursoft.NiBot
 ```
 
+Update an existing installation:
+
+```bash
+dotnet tool update --global Aiursoft.NiBot
+```
+
+Remove the CLI:
+
+```bash
+dotnet tool uninstall --global Aiursoft.NiBot
+```
+
 ## Usage
+
+Run the command to see available options:
+
+```bash
+nibot --help
+```
 
 After getting the binary, run it directly in the terminal.
 
@@ -67,9 +88,11 @@ It will fetch all images in the folder and compare them with each other. If two 
 
 It will pick the best one based the `--keep` option. If the `--action` is set to `Delete`, it will delete the rest of the duplicates. If the `--action` is set to `MoveToTrash`, it will move the rest of the duplicates to the trash.
 
-With the `--interactive` option, it will preview each photo and ask for confirmation before deleting files.
+Without `--yes`, it will preview each photo and ask for confirmation before deleting files.
 
-## Install as a Class Library
+<a name="install-as-a-class-library"></a>
+<a name="use-as-a-library"></a>
+### Use as a library
 
 You can also install this tool as a class library. 
 
@@ -96,22 +119,53 @@ Then you can use the `DedupEngine` class to de-duplicate images in your own code
 
 That's it!
 
-## Run locally
+## Configuration
 
-Requirements about how to run
+Configuration is supplied through command-line options; no additional application settings file is required. Use `nibot --help` or `nibot <command> --help` for current options. The deduplication defaults and action choices are preserved in Usage.
 
-1. [.NET 10 SDK](http://dot.net/)
-2. Execute `dotnet run` to run the app
+Inspect the selected action before processing a real library: `Delete` removes duplicate files, `MoveToTrash` moves them to trash, and `Nothing` leaves them in place. Archiving uses its own model, plan and apply options; see the complete archive guide for model installation, digest verification and plan approval.
 
-## Run in Microsoft Visual Studio
+## Development
 
-1. Open the `.sln` file in the project path.
-2. Press `F5`.
+Install the [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0).
+
+From the repository root, restore and build:
+
+```bash
+dotnet restore Aiursoft.NiBot.sln
+dotnet build Aiursoft.NiBot.sln --no-restore
+```
+
+<a name="run-locally"></a>
+<a name="local-run"></a>
+Run the tool from source, with the prerequisites and configuration above:
+
+```bash
+dotnet run --project src/Aiursoft.NiBot/Aiursoft.NiBot.csproj -- --help
+```
+
+<a name="run-in-microsoft-visual-studio"></a>
+In Microsoft Visual Studio, open `Aiursoft.NiBot.sln`, select `Aiursoft.NiBot` as the startup project and press `F5`. Configure the arguments and environment for the task you want to run.
+
+Run the existing tests:
+
+```bash
+dotnet test Aiursoft.NiBot.sln --no-restore
+```
+
+
+## Documentation
+
+- [Incremental archive setup and usage](https://github.com/AiursoftWeb/nibot/blob/master/docs/archive.md)
 
 ## How to contribute
 
 There are many ways to contribute to the project: logging bugs, submitting pull requests, reporting issues, and creating suggestions.
 
-Even if you with push rights on the repository, you should create a personal fork and create feature branches there when you need them. This keeps the main repository clean and your workflow cruft out of sight.
+Even if you have push rights on the repository, you should create a personal fork and create feature branches there when you need them. This keeps the main repository clean and your workflow cruft out of sight.
 
 We're also interested in your feedback on the future of this project. You can submit a suggestion or feature request through the issue tracker. To make this process more effective, we're asking that these include more information to help define them more clearly.
+
+## License
+
+Licensed under the [MIT License](https://github.com/AiursoftWeb/nibot/blob/master/LICENSE).
